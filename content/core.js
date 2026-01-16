@@ -130,7 +130,7 @@
         return;
       }
       const text = ns.utils.normalizeText(entry.node.textContent || '');
-      const title = text ? ns.utils.truncate(text, CONFIG.titleMax) : `Prompt ${messages.length + 1}`;
+      const title = text || `Prompt ${messages.length + 1}`;
       let assistantText = '';
       for (let i = index + 1; i < sequence.length; i += 1) {
         if (sequence[i].role === 'assistant') {
