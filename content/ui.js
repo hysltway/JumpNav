@@ -26,15 +26,17 @@
         --nav-muted: #6e675b;
         --nav-accent: #f0a34b;
         --nav-shadow: 0 18px 42px rgba(23, 21, 16, 0.16);
+        --nav-panel-offset: 88px;
+        --nav-panel-max-height: calc(100vh - 176px);
         font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
       }
 
       .panel {
         position: fixed;
-        top: 88px;
+        top: var(--nav-panel-offset);
         right: 16px;
         width: 280px;
-        max-height: calc(100vh - 112px);
+        max-height: var(--nav-panel-max-height);
         height: auto;
         display: flex;
         flex-direction: column;
@@ -151,7 +153,7 @@
       .fab {
         position: fixed;
         right: 16px;
-        bottom: 24px;
+        top: calc(var(--nav-panel-offset) + 12px);
         width: 48px;
         height: 48px;
         border-radius: 999px;
