@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "ChatGPT Quick Navigator",
+  "description": "Jump between user prompts in ChatGPT conversations with a floating navigator.",
+  "version": "0.1.0",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://cc01.plusai.io/*"
+      ],
+      "js": [
+        "content/namespace.js",
+        "content/utils.js",
+        "content/adapter.js",
+        "content/ui.js",
+        "content/core.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://cc01.plusai.io/*"
+  ]
+}
