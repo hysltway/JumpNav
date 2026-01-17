@@ -191,8 +191,8 @@
       .nav-root[data-minimal="1"] .panel {
         width: max-content;
         max-width: 70vw;
-        top: 50%;
-        transform: translateY(-50%);
+        top: var(--nav-panel-offset);
+        transform: none;
       }
 
       .nav-root[data-minimal="1"] .panel-header {
