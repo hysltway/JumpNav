@@ -299,15 +299,16 @@ Welcome to submit Issues or Pull Requests!
 
 ## 📄 License
 
-MIT License - Free to use, modify, and distribute
+CC BY-NC-SA 4.0 (Creative Commons Attribution-NonCommercial-ShareAlike 4.0)
+
+- ✅ Free to use, copy, modify, and distribute
+- ✅ Must provide attribution to original author
+- ❌ Cannot be used for commercial purposes
+- ✅ Derivative works must use the same license
+
+See full license: [CC BY-NC-SA 4.0 License](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 ## 📞 Contact
 
 Have questions or suggestions? Feel free to submit an Issue for feedback 😊
 
----
-
-**Last Updated**: January 2026  
-**Current Version**: 0.1.0  
-**Lines of Code**: ~2500+ (including comments)  
-**Extension Size**: < 100KB (uncompressed)
