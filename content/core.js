@@ -3,6 +3,8 @@
 
   const ns = window.ChatGptNav;
   const { CONFIG } = ns;
+  const PREVIEW_HIDE_DELAY = 140;
+  const MINIMAL_MODE_KEY = 'chatgpt-nav-minimal-mode';
 
   const state = {
     started: false,
@@ -14,7 +16,10 @@
     signature: '',
     rebuildTimer: null,
     pollTimer: null,
-    ui: null
+    ui: null,
+    minimalMode: false,
+    previewIndex: null,
+    previewHideTimer: null
   };
 
   function start() {
@@ -46,6 +51,8 @@
     }
     state.ui = ns.ui.createUI();
     ns.ui.setTitle(state.ui, getNavigatorTitle());
+    state.minimalMode = loadMinimalMode();
+    ns.ui.setMinimalMode(state.ui, state.minimalMode);
     attachUiHandlers();
     initFabDrag();
     scheduleRebuild('init');
@@ -55,6 +62,10 @@
   function attachUiHandlers() {
     state.ui.toggle.addEventListener('click', () => {
       ns.ui.setCollapsed(state.ui, true);
+    });
+
+    state.ui.minimalToggle.addEventListener('click', () => {
+      setMinimalMode(!state.minimalMode);
     });
 
     state.ui.fab.addEventListener('click', () => {
@@ -77,6 +88,15 @@
       }
       scrollToMessage(message.node);
     });
+
+    state.ui.body.addEventListener('pointerover', handleItemPointerOver);
+    state.ui.body.addEventListener('pointerout', handleItemPointerOut);
+    state.ui.body.addEventListener('focusin', handleItemFocusIn);
+    state.ui.body.addEventListener('focusout', handleItemFocusOut);
+
+    state.ui.preview.addEventListener('pointerenter', handlePreviewPointerEnter);
+    state.ui.preview.addEventListener('pointerleave', handlePreviewPointerLeave);
+    state.ui.preview.addEventListener('click', handlePreviewClick);
   }
 
   function initFabDrag() {
@@ -199,7 +219,7 @@
     state.url = location.href;
     state.signature = '';
     state.messages = [];
-    ns.ui.renderList(state.ui, state.messages);
+    renderMessages();
     if (state.observer) {
       state.observer.disconnect();
       state.observer = null;
@@ -264,7 +284,7 @@
     }
     state.signature = signature;
     state.messages = messages;
-    ns.ui.renderList(state.ui, state.messages);
+    renderMessages();
   }
 
   function attachObserver(root) {
@@ -321,6 +341,146 @@
       return 'Gemini Navigator';
     }
     return 'ChatGPT Navigator';
+  }
+
+  function renderMessages() {
+    clearPreviewHideTimer();
+    state.previewIndex = null;
+    ns.ui.hidePreview(state.ui);
+    ns.ui.renderList(state.ui, state.messages, { minimalMode: state.minimalMode });
+  }
+
+  function setMinimalMode(enabled) {
+    state.minimalMode = enabled;
+    saveMinimalMode(enabled);
+    ns.ui.setMinimalMode(state.ui, enabled);
+    renderMessages();
+  }
+
+  function loadMinimalMode() {
+    try {
+      return window.localStorage.getItem(MINIMAL_MODE_KEY) === '1';
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function saveMinimalMode(value) {
+    try {
+      window.localStorage.setItem(MINIMAL_MODE_KEY, value ? '1' : '0');
+    } catch (error) {
+      // Ignore storage failures.
+    }
+  }
+
+  function handleItemPointerOver(event) {
+    if (!state.minimalMode) {
+      return;
+    }
+    const item = event.target.closest('.nav-item');
+    if (!item || !state.ui.body.contains(item)) {
+      return;
+    }
+    clearPreviewHideTimer();
+    showPreviewForItem(item);
+  }
+
+  function handleItemPointerOut(event) {
+    if (!state.minimalMode) {
+      return;
+    }
+    const item = event.target.closest('.nav-item');
+    if (!item || !state.ui.body.contains(item)) {
+      return;
+    }
+    const related = event.relatedTarget;
+    if (related && (item.contains(related) || state.ui.preview.contains(related))) {
+      return;
+    }
+    schedulePreviewHide();
+  }
+
+  function handleItemFocusIn(event) {
+    if (!state.minimalMode) {
+      return;
+    }
+    const item = event.target.closest('.nav-item');
+    if (!item || !state.ui.body.contains(item)) {
+      return;
+    }
+    clearPreviewHideTimer();
+    showPreviewForItem(item);
+  }
+
+  function handleItemFocusOut(event) {
+    if (!state.minimalMode) {
+      return;
+    }
+    const item = event.target.closest('.nav-item');
+    if (!item || !state.ui.body.contains(item)) {
+      return;
+    }
+    schedulePreviewHide();
+  }
+
+  function handlePreviewPointerEnter() {
+    if (!state.minimalMode) {
+      return;
+    }
+    clearPreviewHideTimer();
+  }
+
+  function handlePreviewPointerLeave(event) {
+    if (!state.minimalMode) {
+      return;
+    }
+    const related = event.relatedTarget;
+    if (related && related.closest && related.closest('.nav-item')) {
+      return;
+    }
+    schedulePreviewHide();
+  }
+
+  function handlePreviewClick() {
+    if (!state.minimalMode) {
+      return;
+    }
+    const index = state.previewIndex;
+    if (typeof index !== 'number') {
+      return;
+    }
+    const message = state.messages[index];
+    if (!message || !message.node) {
+      return;
+    }
+    scrollToMessage(message.node);
+  }
+
+  function showPreviewForItem(item) {
+    const index = Number(item.dataset.index);
+    const message = state.messages[index];
+    if (!message) {
+      return;
+    }
+    state.previewIndex = index;
+    ns.ui.showPreview(state.ui, message, item);
+  }
+
+  function schedulePreviewHide() {
+    clearPreviewHideTimer();
+    state.previewHideTimer = window.setTimeout(() => {
+      state.previewHideTimer = null;
+      state.previewIndex = null;
+      ns.ui.hidePreview(state.ui);
+    }, PREVIEW_HIDE_DELAY);
+  }
+
+  function clearPreviewHideTimer() {
+    if (!state.previewHideTimer) {
+      return;
+    }
+    window.clearTimeout(state.previewHideTimer);
+    state.previewHideTimer = null;
   }
 
   ns.core = {
