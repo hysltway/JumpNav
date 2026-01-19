@@ -131,11 +131,29 @@
         display: flex;
         flex-direction: column;
         gap: 4px;
+        position: relative;
       }
 
       .nav-item:hover {
         border-color: var(--nav-accent-strong);
         box-shadow: 0 8px 20px var(--nav-accent-shadow);
+      }
+
+      .nav-item.is-active {
+        border-color: var(--nav-accent-strong);
+        background: var(--nav-hover);
+        box-shadow: 0 8px 20px var(--nav-accent-shadow);
+      }
+
+      .nav-item.is-active::before {
+        content: '';
+        position: absolute;
+        left: -6px;
+        top: 8px;
+        bottom: 8px;
+        width: 4px;
+        border-radius: 999px;
+        background: var(--nav-accent-strong);
       }
 
       .nav-root[data-minimal="1"] .nav-item {
@@ -248,6 +266,26 @@
         justify-content: center;
         align-items: center;
         gap: 0;
+      }
+
+      .nav-root[data-minimal="1"] .nav-item.is-active {
+        box-shadow: 0 0 0 2px var(--nav-accent-strong);
+      }
+
+      .nav-root[data-minimal="1"] .nav-item.is-active::before {
+        display: none;
+      }
+
+      .nav-root[data-minimal="1"] .nav-item.is-active::after {
+        content: '';
+        position: absolute;
+        right: -2px;
+        top: -2px;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--nav-accent-strong);
+        box-shadow: 0 0 0 2px var(--nav-surface);
       }
 
       .fab {
@@ -485,6 +523,21 @@
     ui.toggle.setAttribute('aria-label', HIDE_LABEL);
   }
 
+  function setActiveIndex(ui, index) {
+    const activeIndex = Number.isFinite(index) ? index : null;
+    const items = ui.body.querySelectorAll('.nav-item');
+    items.forEach((item) => {
+      const itemIndex = Number(item.dataset.index);
+      const isActive = activeIndex !== null && itemIndex === activeIndex;
+      item.classList.toggle('is-active', isActive);
+      if (isActive) {
+        item.setAttribute('aria-current', 'true');
+      } else {
+        item.removeAttribute('aria-current');
+      }
+    });
+  }
+
   function showPreview(ui, message, item) {
     if (!message || !item) {
       return;
@@ -559,6 +612,7 @@
     renderList,
     setCollapsed,
     setMinimalMode,
+    setActiveIndex,
     showPreview,
     hidePreview,
     setTitle

@@ -19,6 +19,8 @@
     ui: null,
     minimalMode: false,
     previewIndex: null,
+    activeIndex: null,
+    activeRaf: null,
     previewHideTimer: null
   };
 
@@ -54,6 +56,7 @@
     state.minimalMode = loadMinimalMode();
     ns.ui.setMinimalMode(state.ui, state.minimalMode);
     attachUiHandlers();
+    initActiveTracking();
     initFabDrag();
     scheduleRebuild('init');
     startUrlPolling();
@@ -86,6 +89,7 @@
       if (!message || !message.node) {
         return;
       }
+      setActiveIndex(index, true);
       scrollToMessage(message.node);
     });
 
@@ -219,6 +223,7 @@
     state.url = location.href;
     state.signature = '';
     state.messages = [];
+    state.activeIndex = null;
     renderMessages();
     if (state.observer) {
       state.observer.disconnect();
@@ -263,17 +268,21 @@
       const text = ns.utils.normalizeText(entry.node.textContent || '');
       const title = text || `Prompt ${messages.length + 1}`;
       let assistantText = '';
+      let lastAssistantNode = null;
       for (let i = index + 1; i < sequence.length; i += 1) {
         if (sequence[i].role === 'assistant') {
-          assistantText = ns.utils.normalizeText(sequence[i].node.textContent || '');
-          break;
+          if (!assistantText) {
+            assistantText = ns.utils.normalizeText(sequence[i].node.textContent || '');
+          }
+          lastAssistantNode = sequence[i].node;
+          continue;
         }
         if (sequence[i].role === 'user') {
           break;
         }
       }
       const preview = assistantText ? ns.utils.truncate(assistantText, CONFIG.previewMax) : '';
-      messages.push({ node: entry.node, title, preview, text });
+      messages.push({ node: entry.node, title, preview, text, endNode: lastAssistantNode });
     });
 
     const lastText = messages.length ? messages[messages.length - 1].text : '';
@@ -348,6 +357,7 @@
     state.previewIndex = null;
     ns.ui.hidePreview(state.ui);
     ns.ui.renderList(state.ui, state.messages, { minimalMode: state.minimalMode });
+    refreshActiveIndex(true);
   }
 
   function setMinimalMode(enabled) {
@@ -464,6 +474,90 @@
     }
     state.previewIndex = index;
     ns.ui.showPreview(state.ui, message, item);
+  }
+
+  function initActiveTracking() {
+    const scheduleUpdate = () => {
+      if (state.activeRaf) {
+        return;
+      }
+      state.activeRaf = window.requestAnimationFrame(() => {
+        state.activeRaf = null;
+        refreshActiveIndex();
+      });
+    };
+    document.addEventListener('scroll', scheduleUpdate, true);
+    window.addEventListener('resize', scheduleUpdate);
+  }
+
+  function refreshActiveIndex(force = false) {
+    const nextIndex = getActiveIndex();
+    setActiveIndex(nextIndex, force);
+  }
+
+  function setActiveIndex(nextIndex, force = false) {
+    if (!force && nextIndex === state.activeIndex) {
+      return;
+    }
+    state.activeIndex = nextIndex;
+    ns.ui.setActiveIndex(state.ui, nextIndex);
+  }
+
+  function getActiveIndex() {
+    if (!state.messages.length) {
+      return null;
+    }
+    const targetY = window.innerHeight / 2;
+    const viewportBottom = window.innerHeight;
+    let containingIndex = null;
+    let nearestVisibleIndex = null;
+    let nearestVisibleDistance = Infinity;
+    let nearestIndex = null;
+    let nearestDistance = Infinity;
+
+    state.messages.forEach((message, index) => {
+      if (!message.node || typeof message.node.getBoundingClientRect !== 'function') {
+        return;
+      }
+      const startRect = message.node.getBoundingClientRect();
+      if (startRect.width === 0 && startRect.height === 0) {
+        return;
+      }
+      let endRect = startRect;
+      if (message.endNode && typeof message.endNode.getBoundingClientRect === 'function') {
+        const candidate = message.endNode.getBoundingClientRect();
+        if (!(candidate.width === 0 && candidate.height === 0)) {
+          endRect = candidate;
+        }
+      }
+      const blockTop = Math.min(startRect.top, endRect.top);
+      const blockBottom = Math.max(startRect.bottom, endRect.bottom);
+      const blockCenter = (blockTop + blockBottom) / 2;
+      const distance = Math.abs(blockCenter - targetY);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearestIndex = index;
+      }
+      const isVisible = blockBottom > 0 && blockTop < viewportBottom;
+      if (!isVisible) {
+        return;
+      }
+      if (blockTop <= targetY && blockBottom >= targetY) {
+        containingIndex = index;
+      }
+      if (distance < nearestVisibleDistance) {
+        nearestVisibleDistance = distance;
+        nearestVisibleIndex = index;
+      }
+    });
+
+    if (containingIndex !== null) {
+      return containingIndex;
+    }
+    if (nearestVisibleIndex !== null) {
+      return nearestVisibleIndex;
+    }
+    return nearestIndex !== null ? nearestIndex : state.activeIndex;
   }
 
   function schedulePreviewHide() {
