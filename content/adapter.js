@@ -33,10 +33,6 @@
     return createChatLikeAdapter('chatgpt');
   }
 
-  function createPlusAiAdapter() {
-    return createChatLikeAdapter('plusai');
-  }
-
   function createGeminiAdapter() {
     return {
       id: 'gemini',
@@ -155,9 +151,6 @@
     const host = location.hostname;
     if (host === 'chatgpt.com' || host === 'chat.openai.com') {
       return createChatGptAdapter();
-    }
-    if (host === 'cc01.plusai.io') {
-      return createPlusAiAdapter();
     }
     if (host === 'gemini.google.com') {
       return createGeminiAdapter();

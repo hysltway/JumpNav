@@ -363,6 +363,7 @@
     const root = document.createElement('div');
     root.className = 'nav-root';
     root.dataset.collapsed = '0';
+    root.dataset.adaptiveMinimal = '0';
 
     const panel = document.createElement('div');
     panel.className = 'panel';
@@ -523,6 +524,15 @@
     ui.toggle.setAttribute('aria-label', HIDE_LABEL);
   }
 
+  function setAdaptiveMinimal(ui, enabled) {
+    ui.root.dataset.adaptiveMinimal = enabled ? '1' : '0';
+    if (enabled) {
+      ui.minimalToggle.title = 'Adaptive minimal mode is active';
+    } else {
+      ui.minimalToggle.removeAttribute('title');
+    }
+  }
+
   function setActiveIndex(ui, index) {
     const activeIndex = Number.isFinite(index) ? index : null;
     const items = ui.body.querySelectorAll('.nav-item');
@@ -612,6 +622,7 @@
     renderList,
     setCollapsed,
     setMinimalMode,
+    setAdaptiveMinimal,
     setActiveIndex,
     showPreview,
     hidePreview,

@@ -4,6 +4,8 @@ A lightweight yet powerful browser extension that brings intelligent navigation 
 
 **Language:** [简体中文](README.md) | **English**
 
+> Current Version: **v0.4.0**
+
 ## 🚀 Chrome Web Store (Recommended)
 
 Now live on the Chrome Web Store. Install there for automatic updates and the smoothest experience.
@@ -29,11 +31,25 @@ Now live on the Chrome Web Store. Install there for automatic updates and the sm
 - Preview expands on hover or keyboard focus, maintaining visual simplicity
 - Same jump and locating capabilities with zero feature loss
 
+#### Adaptive Mode Switching (Automatic)
+- Switches mode based on geometric overlap between panel left edge and conversation content right edge
+- Automatically returns to normal mode when enough layout space is available again (including Gemini pages)
+- Uses a stable baseline + hysteresis during continuous window resizing to prevent flicker
+- Mode button remains clickable in adaptive minimal state, but normal mode is blocked if it would overlap content
+
 ### 🎮 Interaction Design
 - **Draggable Floating Button**: Right-side circular FAB button can be dragged anywhere on screen
 - **Position Memory**: Automatically saves button position and restores it on next visit
 - **Keyboard Friendly**: Complete keyboard navigation support with proper focus management
 - **Accessibility Support**: Respects `prefers-reduced-motion` system setting, providing non-transition experience for sensitive users
+
+## 🆕 v0.4.0 Updates
+
+- Removed `cc01.plusai.io` platform support and reduced host scope
+- Reworked adaptive switching from viewport-width rules to overlap-based geometry detection
+- Fixed Gemini issue where panel failed to return to normal mode after window expansion
+- Fixed mode flickering during continuous window resize operations
+- Synced Chinese and English docs with adaptive behavior and troubleshooting guidance
 
 ## 📸 Interface Preview
 
@@ -70,7 +86,6 @@ Now live on the Chrome Web Store. Install there for automatic updates and the sm
 | **ChatGPT** | ✅ chatgpt.com | Official version |
 | **OpenAI Chat** | ✅ chat.openai.com | OpenAI official chat |
 | **Google Gemini** | ✅ gemini.google.com | Google AI assistant |
-| **PlusAI** | ✅ cc01.plusai.io | Third-party chat platform |
 
 The extension is built with an **Adapter Pattern** for easy support of new platforms—see the "Adding New Platforms" section for details.
 
@@ -239,6 +254,17 @@ CONFIG.previewMax = 100   // Character count, overflow is ellipsized
 - Check system accessibility settings for "Reduce motion" toggle
 - If enabled, preview displays directly (without transition animation), functionality unaffected
 - Try manually clicking or keyboard focusing entries
+
+### Q: Mode switching behaves incorrectly during resize (flicker or stuck in minimal mode)
+
+**Causes:**
+- Conversation nodes may be measured as oversized wrappers, causing overlap to be detected continuously
+- Unstable switching baselines during active resize can trigger rapid mode toggling
+
+**Solutions:**
+- Upgrade to `v0.4.0` or later (Gemini restore + flicker fixes included)
+- Reload the extension at `chrome://extensions` and refresh the page
+- If the issue persists, inspect whether the site changed message node structure
 
 ## 🎨 UI Design Details
 

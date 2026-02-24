@@ -5,6 +5,33 @@
   const { CONFIG } = ns;
   const PREVIEW_HIDE_DELAY = 140;
   const MINIMAL_MODE_KEY = 'chatgpt-nav-minimal-mode';
+  const DEFAULT_NORMAL_PANEL_WIDTH = 280;
+  const ADAPTIVE_INTERSECT_ENTER_GAP = 6;
+  const ADAPTIVE_INTERSECT_EXIT_GAP = 28;
+  const MESSAGE_SCAN_LIMIT = 80;
+  const FULL_WIDTH_IGNORE_RATIO = 0.9;
+  const MESSAGE_CONTENT_SELECTORS = [
+    '[data-message-author-role="assistant"] .min-h-8.text-message',
+    '[data-message-author-role="assistant"] [class*="text-message"]',
+    '[data-message-author-role="user"] .min-h-8.text-message',
+    '[data-message-author-role="user"] [class*="text-message"]',
+    '[data-author-role="assistant"] .min-h-8.text-message',
+    '[data-author-role="assistant"] [class*="text-message"]',
+    '[data-author-role="user"] .min-h-8.text-message',
+    '[data-author-role="user"] [class*="text-message"]',
+    'user-query.ng-star-inserted',
+    '.user-query.ng-star-inserted'
+  ].join(',');
+  const MESSAGE_ROLE_SELECTORS = [
+    '[data-message-author-role="assistant"]',
+    '[data-message-author-role="user"]',
+    '[data-author-role="assistant"]',
+    '[data-author-role="user"]',
+    'user-query.ng-star-inserted',
+    '.user-query.ng-star-inserted'
+  ].join(',');
+  const MESSAGE_INNER_SELECTORS =
+    '.min-h-8.text-message, .text-message, [class*="text-message"], .query-text, .markdown, .prose';
 
   const state = {
     started: false,
@@ -18,10 +45,13 @@
     pollTimer: null,
     ui: null,
     minimalMode: false,
+    adaptiveMinimalMode: false,
+    effectiveMinimalMode: false,
     previewIndex: null,
     activeIndex: null,
     activeRaf: null,
-    previewHideTimer: null
+    previewHideTimer: null,
+    normalPanelWidth: DEFAULT_NORMAL_PANEL_WIDTH
   };
 
   function start() {
@@ -54,7 +84,7 @@
     state.ui = ns.ui.createUI();
     ns.ui.setTitle(state.ui, getNavigatorTitle());
     state.minimalMode = loadMinimalMode();
-    ns.ui.setMinimalMode(state.ui, state.minimalMode);
+    syncAdaptiveMode(true);
     attachUiHandlers();
     initActiveTracking();
     initFabDrag();
@@ -68,7 +98,13 @@
     });
 
     state.ui.minimalToggle.addEventListener('click', () => {
-      setMinimalMode(!state.minimalMode);
+      syncAdaptiveMode(true);
+      const nextMinimal = !state.minimalMode;
+      if (!nextMinimal && state.adaptiveMinimalMode) {
+        syncDisplayMode(true);
+        return;
+      }
+      setMinimalMode(nextMinimal);
     });
 
     state.ui.fab.addEventListener('click', () => {
@@ -77,6 +113,7 @@
         return;
       }
       ns.ui.setCollapsed(state.ui, false);
+      syncAdaptiveMode(true);
     });
 
     state.ui.body.addEventListener('click', (event) => {
@@ -294,6 +331,7 @@
     state.signature = signature;
     state.messages = messages;
     renderMessages();
+    syncAdaptiveMode();
   }
 
   function attachObserver(root) {
@@ -356,15 +394,207 @@
     clearPreviewHideTimer();
     state.previewIndex = null;
     ns.ui.hidePreview(state.ui);
-    ns.ui.renderList(state.ui, state.messages, { minimalMode: state.minimalMode });
+    ns.ui.renderList(state.ui, state.messages, { minimalMode: state.effectiveMinimalMode });
     refreshActiveIndex(true);
   }
 
   function setMinimalMode(enabled) {
     state.minimalMode = enabled;
     saveMinimalMode(enabled);
-    ns.ui.setMinimalMode(state.ui, enabled);
+    syncDisplayMode(true);
+  }
+
+  function isMinimalMode() {
+    return state.minimalMode || state.adaptiveMinimalMode;
+  }
+
+  function shouldEnableAdaptiveMinimal() {
+    if (!state.ui || !state.ui.panel || !state.root) {
+      return false;
+    }
+    if (state.ui.root.dataset.collapsed === '1') {
+      return false;
+    }
+    const panelRect = state.ui.panel.getBoundingClientRect();
+    if (panelRect.width === 0 || panelRect.height === 0) {
+      return false;
+    }
+    const messageRight = getConversationRightBoundary();
+    if (!Number.isFinite(messageRight)) {
+      return false;
+    }
+    const panelLeftForOverlap = getPanelLeftForAdaptiveCheck(panelRect);
+    if (!Number.isFinite(panelLeftForOverlap)) {
+      return false;
+    }
+    // Use hysteresis to avoid mode jitter around the overlap boundary.
+    const gap = state.adaptiveMinimalMode
+      ? ADAPTIVE_INTERSECT_EXIT_GAP
+      : ADAPTIVE_INTERSECT_ENTER_GAP;
+    return panelLeftForOverlap <= messageRight + gap;
+  }
+
+  function getPanelLeftForAdaptiveCheck(panelRect) {
+    if (!panelRect || !Number.isFinite(panelRect.right)) {
+      return null;
+    }
+    const normalWidth = getNormalPanelWidth(panelRect);
+    if (!Number.isFinite(normalWidth) || normalWidth <= 0) {
+      return panelRect.left;
+    }
+    return panelRect.right - normalWidth;
+  }
+
+  function getNormalPanelWidth(panelRect) {
+    if (!state.effectiveMinimalMode && panelRect && Number.isFinite(panelRect.width)) {
+      if (panelRect.width > 0) {
+        state.normalPanelWidth = panelRect.width;
+      }
+    }
+    if (Number.isFinite(state.normalPanelWidth) && state.normalPanelWidth > 0) {
+      return state.normalPanelWidth;
+    }
+    return DEFAULT_NORMAL_PANEL_WIDTH;
+  }
+
+  function getConversationRightBoundary() {
+    const trackedRight = getTrackedMessagesRightBoundary();
+    if (Number.isFinite(trackedRight)) {
+      return trackedRight;
+    }
+    const scope = state.root || document;
+    if (!scope || typeof scope.querySelectorAll !== 'function') {
+      return null;
+    }
+    const primaryNodes = scope.querySelectorAll(MESSAGE_CONTENT_SELECTORS);
+    const primaryRight = getMaxMessageRight(primaryNodes, false);
+    if (Number.isFinite(primaryRight)) {
+      return primaryRight;
+    }
+    const fallbackNodes = scope.querySelectorAll(MESSAGE_ROLE_SELECTORS);
+    return getMaxMessageRight(fallbackNodes, true);
+  }
+
+  function getTrackedMessagesRightBoundary() {
+    if (!Array.isArray(state.messages) || !state.messages.length) {
+      return null;
+    }
+    const nodes = [];
+    const seen = new Set();
+    state.messages.forEach((message) => {
+      if (message && message.node && !seen.has(message.node)) {
+        seen.add(message.node);
+        nodes.push(message.node);
+      }
+      if (message && message.endNode && !seen.has(message.endNode)) {
+        seen.add(message.endNode);
+        nodes.push(message.endNode);
+      }
+    });
+    return getMaxMessageRight(nodes, true);
+  }
+
+  function getMaxMessageRight(nodes, useInnerContent) {
+    if (!nodes || !nodes.length) {
+      return null;
+    }
+    const viewportBottom = window.innerHeight || 0;
+    const viewportWidth = window.innerWidth || 0;
+    let maxVisibleRight = -Infinity;
+    let visibleCount = 0;
+    let maxAnyRight = -Infinity;
+    let sampledCount = 0;
+
+    for (const node of nodes) {
+      if (!node || typeof node.getBoundingClientRect !== 'function') {
+        continue;
+      }
+      const target = useInnerContent ? getMessageContentNode(node) : node;
+      if (!target || typeof target.getBoundingClientRect !== 'function') {
+        continue;
+      }
+      const rect = target.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        continue;
+      }
+      if (viewportWidth > 0 && rect.width >= viewportWidth * FULL_WIDTH_IGNORE_RATIO) {
+        continue;
+      }
+
+      if (sampledCount < MESSAGE_SCAN_LIMIT) {
+        maxAnyRight = Math.max(maxAnyRight, rect.right);
+        sampledCount += 1;
+      }
+
+      const isVisible = rect.bottom > -120 && rect.top < viewportBottom + 120;
+      if (!isVisible) {
+        continue;
+      }
+      maxVisibleRight = Math.max(maxVisibleRight, rect.right);
+      visibleCount += 1;
+      if (visibleCount >= MESSAGE_SCAN_LIMIT) {
+        break;
+      }
+    }
+
+    if (Number.isFinite(maxVisibleRight)) {
+      return maxVisibleRight;
+    }
+    if (Number.isFinite(maxAnyRight)) {
+      return maxAnyRight;
+    }
+    return null;
+  }
+
+  function getMessageContentNode(node) {
+    if (!node || typeof node.matches !== 'function') {
+      return null;
+    }
+    if (node.matches(MESSAGE_INNER_SELECTORS)) {
+      return node;
+    }
+    if (typeof node.querySelector !== 'function') {
+      return node;
+    }
+    return node.querySelector(MESSAGE_INNER_SELECTORS) || node;
+  }
+
+  function syncAdaptiveMode(force = false) {
+    const nextValue = shouldEnableAdaptiveMinimal();
+    const changed = nextValue !== state.adaptiveMinimalMode;
+    if (!force && !changed) {
+      return;
+    }
+    state.adaptiveMinimalMode = nextValue;
+    if (ns.ui.setAdaptiveMinimal) {
+      ns.ui.setAdaptiveMinimal(state.ui, state.adaptiveMinimalMode);
+    }
+    syncDisplayMode(force || changed);
+  }
+
+  function syncDisplayMode(forceRender = false) {
+    const nextMode = isMinimalMode();
+    const changed = nextMode !== state.effectiveMinimalMode;
+    if (!forceRender && !changed) {
+      return;
+    }
+    state.effectiveMinimalMode = nextMode;
+    ns.ui.setMinimalMode(state.ui, nextMode);
     renderMessages();
+  }
+
+  function refreshPreviewPosition() {
+    if (!isMinimalMode()) {
+      return;
+    }
+    if (typeof state.previewIndex !== 'number') {
+      return;
+    }
+    const item = state.ui.body.querySelector(`.nav-item[data-index="${state.previewIndex}"]`);
+    if (!item) {
+      return;
+    }
+    showPreviewForItem(item);
   }
 
   function loadMinimalMode() {
@@ -384,7 +614,7 @@
   }
 
   function handleItemPointerOver(event) {
-    if (!state.minimalMode) {
+    if (!isMinimalMode()) {
       return;
     }
     const item = event.target.closest('.nav-item');
@@ -396,7 +626,7 @@
   }
 
   function handleItemPointerOut(event) {
-    if (!state.minimalMode) {
+    if (!isMinimalMode()) {
       return;
     }
     const item = event.target.closest('.nav-item');
@@ -411,7 +641,7 @@
   }
 
   function handleItemFocusIn(event) {
-    if (!state.minimalMode) {
+    if (!isMinimalMode()) {
       return;
     }
     const item = event.target.closest('.nav-item');
@@ -423,7 +653,7 @@
   }
 
   function handleItemFocusOut(event) {
-    if (!state.minimalMode) {
+    if (!isMinimalMode()) {
       return;
     }
     const item = event.target.closest('.nav-item');
@@ -434,14 +664,14 @@
   }
 
   function handlePreviewPointerEnter() {
-    if (!state.minimalMode) {
+    if (!isMinimalMode()) {
       return;
     }
     clearPreviewHideTimer();
   }
 
   function handlePreviewPointerLeave(event) {
-    if (!state.minimalMode) {
+    if (!isMinimalMode()) {
       return;
     }
     const related = event.relatedTarget;
@@ -452,7 +682,7 @@
   }
 
   function handlePreviewClick() {
-    if (!state.minimalMode) {
+    if (!isMinimalMode()) {
       return;
     }
     const index = state.previewIndex;
@@ -477,7 +707,7 @@
   }
 
   function initActiveTracking() {
-    const scheduleUpdate = () => {
+    const scheduleActiveUpdate = () => {
       if (state.activeRaf) {
         return;
       }
@@ -486,8 +716,19 @@
         refreshActiveIndex();
       });
     };
-    document.addEventListener('scroll', scheduleUpdate, true);
-    window.addEventListener('resize', scheduleUpdate);
+    const scheduleViewportUpdate = () => {
+      if (state.activeRaf) {
+        return;
+      }
+      state.activeRaf = window.requestAnimationFrame(() => {
+        state.activeRaf = null;
+        syncAdaptiveMode();
+        refreshActiveIndex();
+        refreshPreviewPosition();
+      });
+    };
+    document.addEventListener('scroll', scheduleActiveUpdate, true);
+    window.addEventListener('resize', scheduleViewportUpdate);
   }
 
   function refreshActiveIndex(force = false) {
