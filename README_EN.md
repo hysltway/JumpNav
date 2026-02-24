@@ -15,18 +15,15 @@ Now live on the Chrome Web Store. Install there for automatic updates and the sm
 ## 📝 Version Changelog
 
 ### v0.5.0 (2026-02-24)
-- Added automatic light/dark theme adaptation for the navigator panel (no manual toggle required)
-- ChatGPT theme detection now follows `html.dark` / `html.light`
-- Gemini theme detection now follows `body` `color-scheme`
-- Removed generic theme fallback logic to reduce code redundancy and runtime overhead
-- Added dark palette variables and live theme listeners so theme switches apply immediately
+- Added automatic light/dark adaptation so the navigator follows the page appearance
+- Theme auto-follow now works smoothly on both ChatGPT and Gemini
+- Improved dark mode visuals for more comfortable night reading
+- Faster and more stable theme sync when the site appearance changes
 
 ### v0.4.0
-- Removed `cc01.plusai.io` platform support and reduced host scope
-- Reworked adaptive switching from viewport-width rules to overlap-based geometry detection
-- Fixed Gemini issue where panel failed to return to normal mode after window expansion
-- Fixed mode flickering during continuous window resize operations
-- Synced Chinese and English docs with adaptive behavior and troubleshooting guidance
+- Navigator now switches to compact mode when space is tight to reduce overlap
+- Panel can return to normal mode automatically after window size recovers
+- Fixed flickering while continuously resizing the browser window
 
 ## ✨ Core Features
 
