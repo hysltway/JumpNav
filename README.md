@@ -4,7 +4,7 @@
 
 **语言:** **简体中文** | [English](README_EN.md)
 
-> 当前版本：**v0.5.3**
+> 当前版本：**v1.0.0**
 
 ## 🚀 Chrome Web Store（推荐）
 
@@ -13,6 +13,13 @@
 [ChatGPT & Gemini Quick Navi](https://chromewebstore.google.com/detail/chatgpt-gemini-quick-navi/kkemkfabmgjcjlileggigaaemcheapep)
 
 ## 📝 版本更新日志
+
+### v1.0.0
+- ChatGPT 与 Gemini 现在拥有各自独立的浅色配色，视觉更贴近官方页面
+- Gemini 导航面板与条目背景已分层显示，信息层次更清晰
+- 导航条与正文区域的安全间距进一步统一，阅读时更不容易产生压迫感
+- 点击 Hide 后可稳定显示恢复按钮，不再需要刷新页面
+- 恢复按钮固定在右侧，支持上下拖动并自动记忆位置
 
 ### v0.5.3
 - 修复 Gemini 跳转后提问气泡有时不高亮的问题
@@ -70,7 +77,7 @@
 - 自动简约触发时仍可点击模式按钮，但不会强制切回会遮挡正文的正常模式
 
 ### 🎮 交互设计
-- **可拖拽浮窗**：右侧圆形 FAB 按钮，可任意拖动至屏幕内任意位置
+- **可拖拽浮窗**：右侧圆形 FAB 按钮固定在右侧，仅支持上下拖动
 - **位置记忆**：自动保存按钮位置，下次访问时自动恢复
 - **键盘友好**：完整的键盘导航支持，焦点管理规范
 - **无障碍支持**：尊重 `prefers-reduced-motion` 系统设置，为敏感用户提供无过渡方案
@@ -172,7 +179,7 @@ chatgpt-nav-extension/
 | 键 | 值 | 用途 |
 |----|-----|------|
 | `chatgpt-nav-minimal-mode` | `'0'` 或 `'1'` | 记忆用户的显示模式设置 |
-| `chatgpt-nav-fab-position` | `{left: px, top: px}` | 记忆 FAB 按钮的拖拽位置 |
+| `chatgpt-nav-fab-position` | `{top: px}` | 记忆 FAB 按钮的上下位置 |
 
 **隐私承诺**：对话内容仅用于本地 DOM 解析，不上传任何服务器。
 

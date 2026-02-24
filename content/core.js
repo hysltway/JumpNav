@@ -6,10 +6,13 @@
   const PREVIEW_HIDE_DELAY = 140;
   const MINIMAL_MODE_KEY = 'chatgpt-nav-minimal-mode';
   const DEFAULT_NORMAL_PANEL_WIDTH = 280;
-  const ADAPTIVE_INTERSECT_ENTER_GAP = 6;
-  const ADAPTIVE_INTERSECT_EXIT_GAP = 28;
+  const PANEL_CONTENT_MIN_GAP = 14;
+  const ADAPTIVE_INTERSECT_ENTER_GAP = 0;
+  const ADAPTIVE_INTERSECT_EXIT_GAP = 22;
   const MESSAGE_SCAN_LIMIT = 80;
   const FULL_WIDTH_IGNORE_RATIO = 0.9;
+  const FAB_RIGHT_OFFSET = 16;
+  const FAB_VERTICAL_PADDING = 8;
   const MESSAGE_CONTENT_SELECTORS = [
     '[data-message-author-role="assistant"] .min-h-8.text-message',
     '[data-message-author-role="assistant"] [class*="text-message"]',
@@ -164,15 +167,20 @@
     const storageKey = 'chatgpt-nav-fab-position';
     let dragging = false;
     let moved = false;
-    let startX = 0;
     let startY = 0;
-    let startLeft = 0;
     let startTop = 0;
 
     const saved = loadFabPosition(storageKey);
-    if (saved) {
-      applyFabPosition(fab, saved.left, saved.top);
-    }
+    const initialTop =
+      saved && typeof saved.top === 'number'
+        ? saved.top
+        : fab.getBoundingClientRect().top;
+    applyFabPosition(fab, initialTop);
+
+    window.addEventListener('resize', () => {
+      const rect = fab.getBoundingClientRect();
+      applyFabPosition(fab, rect.top);
+    });
 
     fab.addEventListener('pointerdown', (event) => {
       if (event.button !== 0) {
@@ -181,9 +189,7 @@
       const rect = fab.getBoundingClientRect();
       dragging = true;
       moved = false;
-      startX = event.clientX;
       startY = event.clientY;
-      startLeft = rect.left;
       startTop = rect.top;
       fab.classList.add('dragging');
       fab.setPointerCapture(event.pointerId);
@@ -193,15 +199,11 @@
       if (!dragging) {
         return;
       }
-      const dx = event.clientX - startX;
       const dy = event.clientY - startY;
-      if (!moved && Math.hypot(dx, dy) > 3) {
+      if (!moved && Math.abs(dy) > 3) {
         moved = true;
       }
-      const rect = fab.getBoundingClientRect();
-      const nextLeft = clamp(startLeft + dx, 0, window.innerWidth - rect.width);
-      const nextTop = clamp(startTop + dy, 0, window.innerHeight - rect.height);
-      applyFabPosition(fab, nextLeft, nextTop);
+      applyFabPosition(fab, startTop + dy);
     });
 
     fab.addEventListener('pointerup', (event) => {
@@ -227,16 +229,25 @@
     });
   }
 
-  function applyFabPosition(fab, left, top) {
-    fab.style.left = `${left}px`;
-    fab.style.top = `${top}px`;
-    fab.style.right = 'auto';
+  function applyFabPosition(fab, top) {
+    const clampedTop = getClampedFabTop(fab, top);
+    fab.style.left = 'auto';
+    fab.style.top = `${clampedTop}px`;
+    fab.style.right = `${FAB_RIGHT_OFFSET}px`;
     fab.style.bottom = 'auto';
+  }
+
+  function getClampedFabTop(fab, top) {
+    const rect = fab.getBoundingClientRect();
+    const height = rect.height > 0 ? rect.height : 48;
+    const minTop = FAB_VERTICAL_PADDING;
+    const maxTop = Math.max(minTop, window.innerHeight - height - FAB_VERTICAL_PADDING);
+    return clamp(top, minTop, maxTop);
   }
 
   function saveFabPosition(key, fab) {
     const rect = fab.getBoundingClientRect();
-    const payload = { left: rect.left, top: rect.top };
+    const payload = { top: rect.top };
     try {
       window.localStorage.setItem(key, JSON.stringify(payload));
     } catch (error) {
@@ -251,8 +262,11 @@
         return null;
       }
       const parsed = JSON.parse(raw);
+      if (typeof parsed.top === 'number') {
+        return { top: parsed.top };
+      }
       if (typeof parsed.left === 'number' && typeof parsed.top === 'number') {
-        return parsed;
+        return { top: parsed.top };
       }
     } catch (error) {
       return null;
@@ -781,11 +795,11 @@
     if (!Number.isFinite(panelLeftForOverlap)) {
       return false;
     }
-    // Use hysteresis to avoid mode jitter around the overlap boundary.
-    const gap = state.adaptiveMinimalMode
+    // Keep a consistent gap between panel and content, with hysteresis to avoid jitter.
+    const hysteresisGap = state.adaptiveMinimalMode
       ? ADAPTIVE_INTERSECT_EXIT_GAP
       : ADAPTIVE_INTERSECT_ENTER_GAP;
-    return panelLeftForOverlap <= messageRight + gap;
+    return panelLeftForOverlap <= messageRight + PANEL_CONTENT_MIN_GAP + hysteresisGap;
   }
 
   function getPanelLeftForAdaptiveCheck(panelRect) {

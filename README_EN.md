@@ -4,7 +4,7 @@ A lightweight yet powerful browser extension that brings intelligent navigation 
 
 **Language:** [简体中文](README.md) | **English**
 
-> Current Version: **v0.5.3**
+> Current Version: **v1.0.0**
 
 ## 🚀 Chrome Web Store (Recommended)
 
@@ -13,6 +13,13 @@ Now live on the Chrome Web Store. Install there for automatic updates and the sm
 [ChatGPT & Gemini Quick Navi](https://chromewebstore.google.com/detail/chatgpt-gemini-quick-navi/kkemkfabmgjcjlileggigaaemcheapep)
 
 ## 📝 Version Changelog
+
+### v1.0.0
+- ChatGPT and Gemini now use dedicated light palettes for a more native visual feel on each site
+- Gemini panel and item backgrounds are now clearly layered for better visual separation
+- Spacing behavior between panel and chat content is now more consistent while reading
+- Clicking Hide now reliably shows the restore button without requiring a page refresh
+- The restore button stays fixed on the right edge, supports vertical drag, and remembers position
 
 ### v0.5.3
 - Fixed an issue where Gemini prompt bubble highlighting could fail after jump navigation
@@ -66,7 +73,7 @@ Now live on the Chrome Web Store. Install there for automatic updates and the sm
 - Mode button remains clickable in adaptive minimal state, but normal mode is blocked if it would overlap content
 
 ### 🎮 Interaction Design
-- **Draggable Floating Button**: Right-side circular FAB button can be dragged anywhere on screen
+- **Draggable Floating Button**: Right-side circular FAB button stays fixed to the right edge and supports vertical drag only
 - **Position Memory**: Automatically saves button position and restores it on next visit
 - **Keyboard Friendly**: Complete keyboard navigation support with proper focus management
 - **Accessibility Support**: Respects `prefers-reduced-motion` system setting, providing non-transition experience for sensitive users
@@ -167,7 +174,7 @@ The extension uses **localStorage for local storage**, runs completely offline w
 | Key | Value | Purpose |
 |----|-------|---------|
 | `chatgpt-nav-minimal-mode` | `'0'` or `'1'` | Remembers user's display mode preference |
-| `chatgpt-nav-fab-position` | `{left: px, top: px}` | Remembers FAB button's dragged position |
+| `chatgpt-nav-fab-position` | `{top: px}` | Remembers FAB button's vertical position |
 
 **Privacy Promise**: Conversation content is only used for local DOM parsing; nothing is uploaded to any server.
 

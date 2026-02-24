@@ -23,29 +23,87 @@
         inset: 0;
         z-index: 2147483000;
         pointer-events: none;
-        --nav-bg: #FBF9F4;
-        --nav-surface: #FBF9F4;
-        --nav-border: #e2d6ba;
-        --nav-text: #1f1e1a;
-        --nav-muted: #6e675b;
-        --nav-accent: #d3b05b;
-        --nav-accent-strong: #8f6b24;
-        --nav-hover: #f4edd6;
-        --nav-accent-shadow: rgba(143, 107, 36, 0.18);
-        --nav-item-active-color: #8f6b24;
-        --nav-item-active-shadow: rgba(143, 107, 36, 0.18);
-        --nav-control-hover-border: #8f6b24;
-        --nav-control-hover-text: #8f6b24;
-        --nav-control-active-border: #8f6b24;
-        --nav-control-active-bg: #d3b05b;
-        --nav-control-active-text: #3b2a0b;
+        --nav-bg: #f9f9f9;
+        --nav-surface: #f9f9f9;
+        --nav-border: #efefef;
+        --nav-text: #1f1f1f;
+        --nav-muted: #666666;
+        --nav-accent: #efefef;
+        --nav-accent-strong: #1f1f1f;
+        --nav-hover: #efefef;
+        --nav-accent-shadow: rgba(0, 0, 0, 0.06);
+        --nav-item-bg: #f4f4f4;
+        --nav-item-hover-bg: #efefef;
+        --nav-item-active-bg: #eaeaea;
+        --nav-item-hover-border: #efefef;
+        --nav-item-active-border: #eaeaea;
+        --nav-item-active-text: #1f1f1f;
+        --nav-item-indicator-color: #1f1f1f;
+        --nav-item-active-color: #1f1f1f;
+        --nav-item-active-shadow: rgba(0, 0, 0, 0.06);
+        --nav-control-hover-border: #efefef;
+        --nav-control-hover-text: #1f1f1f;
+        --nav-control-active-border: #eaeaea;
+        --nav-control-active-bg: #eaeaea;
+        --nav-control-active-text: #1f1f1f;
         --nav-shadow: 0 18px 42px rgba(23, 21, 16, 0.16);
-        --nav-button-bg: #fff;
-        --nav-item-bg: rgba(255, 255, 255, 0.8);
-        --nav-active-text: #3b2a0b;
+        --nav-button-bg: #f9f9f9;
+        --nav-active-text: #1f1f1f;
         --nav-panel-offset: 88px;
         --nav-panel-max-height: calc(100vh - 176px);
         font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+      }
+
+      .nav-root[data-color-scheme="light"][data-site="chatgpt"] {
+        --nav-bg: #f9f9f9;
+        --nav-surface: #f9f9f9;
+        --nav-border: #efefef;
+        --nav-text: #1f1f1f;
+        --nav-muted: #666666;
+        --nav-accent: #efefef;
+        --nav-accent-strong: #1f1f1f;
+        --nav-hover: #efefef;
+        --nav-item-bg: #f4f4f4;
+        --nav-item-hover-bg: #efefef;
+        --nav-item-active-bg: #eaeaea;
+        --nav-item-hover-border: #efefef;
+        --nav-item-active-border: #eaeaea;
+        --nav-item-active-text: #1f1f1f;
+        --nav-item-indicator-color: #1f1f1f;
+        --nav-item-active-color: #1f1f1f;
+        --nav-item-active-shadow: rgba(0, 0, 0, 0.06);
+        --nav-control-hover-border: #efefef;
+        --nav-control-hover-text: #1f1f1f;
+        --nav-control-active-border: #eaeaea;
+        --nav-control-active-bg: #eaeaea;
+        --nav-control-active-text: #1f1f1f;
+        --nav-button-bg: #f9f9f9;
+      }
+
+      .nav-root[data-color-scheme="light"][data-site="gemini"] {
+        --nav-bg: #f3f6fc;
+        --nav-surface: #f3f6fc;
+        --nav-border: #dce1e9;
+        --nav-text: #1f2a3d;
+        --nav-muted: #546377;
+        --nav-accent: #dce1e9;
+        --nav-accent-strong: #0842a0;
+        --nav-hover: #dce1e9;
+        --nav-item-bg: #e9eef6;
+        --nav-item-hover-bg: #dce1e9;
+        --nav-item-active-bg: #d3e3fd;
+        --nav-item-hover-border: #dce1e9;
+        --nav-item-active-border: #d3e3fd;
+        --nav-item-active-text: #0842a0;
+        --nav-item-indicator-color: #0842a0;
+        --nav-item-active-color: #0842a0;
+        --nav-item-active-shadow: rgba(8, 66, 160, 0.16);
+        --nav-control-hover-border: #dce1e9;
+        --nav-control-hover-text: #0842a0;
+        --nav-control-active-border: #d3e3fd;
+        --nav-control-active-bg: #d3e3fd;
+        --nav-control-active-text: #0842a0;
+        --nav-button-bg: #f3f6fc;
       }
 
       .nav-root[data-color-scheme="dark"] {
@@ -58,6 +116,12 @@
         --nav-accent-strong: #f1c874;
         --nav-hover: #212a36;
         --nav-accent-shadow: rgba(241, 200, 116, 0.18);
+        --nav-item-hover-bg: #212a36;
+        --nav-item-active-bg: #212a36;
+        --nav-item-hover-border: #6fc8ff;
+        --nav-item-active-border: #6fc8ff;
+        --nav-item-active-text: #e8f5ff;
+        --nav-item-indicator-color: #6fc8ff;
         --nav-item-active-color: #6fc8ff;
         --nav-item-active-shadow: rgba(111, 200, 255, 0.28);
         --nav-control-hover-border: #6fc8ff;
@@ -168,13 +232,14 @@
       }
 
       .nav-item:hover {
-        border-color: var(--nav-item-active-color);
+        border-color: var(--nav-item-hover-border);
+        background: var(--nav-item-hover-bg);
         box-shadow: 0 8px 20px var(--nav-item-active-shadow);
       }
 
       .nav-item.is-active {
-        border-color: var(--nav-item-active-color);
-        background: var(--nav-hover);
+        border-color: var(--nav-item-active-border);
+        background: var(--nav-item-active-bg);
         box-shadow: 0 8px 20px var(--nav-item-active-shadow);
       }
 
@@ -186,8 +251,14 @@
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: var(--nav-item-active-color);
+        background: var(--nav-item-indicator-color);
         box-shadow: 0 0 0 2px var(--nav-surface);
+      }
+
+      .nav-item.is-active .nav-item-title,
+      .nav-item.is-active .nav-item-preview,
+      .nav-item.is-active .nav-item-minimal {
+        color: var(--nav-item-active-text);
       }
 
       .nav-root[data-minimal="1"] .nav-item {
@@ -303,13 +374,13 @@
       }
 
       .nav-root[data-minimal="1"] .nav-item.is-active {
-        border-color: var(--nav-item-active-color);
-        background: var(--nav-hover);
-        box-shadow: 0 0 0 1px var(--nav-item-active-color);
+        border-color: var(--nav-item-active-border);
+        background: var(--nav-item-active-bg);
+        box-shadow: 0 0 0 1px var(--nav-item-active-border);
       }
 
       .nav-root[data-minimal="1"] .nav-item.is-active .nav-item-minimal {
-        color: var(--nav-item-active-color);
+        color: var(--nav-item-active-text);
         font-weight: 700;
       }
 
@@ -390,6 +461,7 @@
     root.dataset.collapsed = '0';
     root.dataset.adaptiveMinimal = '0';
     root.dataset.colorScheme = 'light';
+    root.dataset.site = getSiteKey();
 
     const panel = document.createElement('div');
     panel.className = 'panel';
@@ -650,6 +722,14 @@
 
   function setTitle(ui, text) {
     ui.title.textContent = text;
+  }
+
+  function getSiteKey() {
+    const host = location.hostname;
+    if (host === 'gemini.google.com') {
+      return 'gemini';
+    }
+    return 'chatgpt';
   }
 
   ns.ui = {
