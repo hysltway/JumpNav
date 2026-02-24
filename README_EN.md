@@ -29,41 +29,6 @@ Now live on the Chrome Web Store. Install there for automatic updates and the sm
 **Interface Preview 5**
 ![Interface Preview 5](image5.png)
 
-## 📝 Version Changelog
-
-### v1.0.0
-- ChatGPT and Gemini now use dedicated light palettes for a more native visual feel on each site
-- Gemini panel and item backgrounds are now clearly layered for better visual separation
-- Spacing behavior between panel and chat content is now more consistent while reading
-- Clicking Hide now reliably shows the restore button without requiring a page refresh
-- The restore button stays fixed on the right edge, supports vertical drag, and remembers position
-
-### v0.5.3
-- Fixed an issue where Gemini prompt bubble highlighting could fail after jump navigation
-- Highlight feedback now appears after scrolling settles for a smoother locating experience
-- In minimal mode, when space is too tight, the preview can temporarily overlap chat content to keep details readable
-
-### v0.5.2
-- In minimal mode, hover previews now expand in a way that avoids covering the main chat content whenever possible
-- Added a minimum preview width so details stay readable on smaller windows
-- Click feedback now briefly deepens the user prompt bubble background, then smoothly restores it
-
-### v0.5.1 
-- Fixed Gemini normal-mode titles showing hidden speaker prefixes (localized “You said” labels)
-- Navigator now shows only the user’s actual prompt text in normal mode
-- Kept display behavior consistent across different language settings
-
-### v0.5.0 
-- Added automatic light/dark adaptation so the navigator follows the page appearance
-- Theme auto-follow now works smoothly on both ChatGPT and Gemini
-- Improved dark mode visuals for more comfortable night reading
-- Faster and more stable theme sync when the site appearance changes
-
-### v0.4.0
-- Navigator now switches to compact mode when space is tight to reduce overlap
-- Panel can return to normal mode automatically after window size recovers
-- Fixed flickering while continuously resizing the browser window
-
 ## 💡 Core Value
 
 - **Less scrolling, more thinking**: Turn long threads into a structured outline and reduce search friction
