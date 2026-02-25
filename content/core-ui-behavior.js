@@ -506,6 +506,23 @@
   }
 
   function loadMinimalMode() {
+    const legacyValue = loadLegacyMinimalMode();
+    if (!ns.storage || typeof ns.storage.getBoolean !== 'function') {
+      return Promise.resolve(legacyValue);
+    }
+    return ns.storage
+      .getBoolean(MINIMAL_MODE_KEY)
+      .then((storedValue) => {
+        if (typeof storedValue === 'boolean') {
+          return storedValue;
+        }
+        ns.storage.setBoolean(MINIMAL_MODE_KEY, legacyValue);
+        return legacyValue;
+      })
+      .catch(() => legacyValue);
+  }
+
+  function loadLegacyMinimalMode() {
     try {
       return window.localStorage.getItem(MINIMAL_MODE_KEY) === '1';
     } catch (error) {
@@ -514,6 +531,9 @@
   }
 
   function saveMinimalMode(value) {
+    if (ns.storage && typeof ns.storage.setBoolean === 'function') {
+      ns.storage.setBoolean(MINIMAL_MODE_KEY, value);
+    }
     try {
       window.localStorage.setItem(MINIMAL_MODE_KEY, value ? '1' : '0');
     } catch (error) {

@@ -146,8 +146,9 @@
     state.ui = ns.ui.createUI();
     initThemeTracking();
     ns.ui.setTitle(state.ui, getNavigatorTitle());
-    state.minimalMode = loadMinimalMode();
+    state.minimalMode = false;
     syncAdaptiveMode(true);
+    hydrateMinimalModePreference();
     attachUiHandlers();
     initActiveTracking();
     initFabDrag();
@@ -188,16 +189,9 @@
       if (!item) {
         return;
       }
-      const index = Number(item.dataset.index);
-      const message = state.messages[index];
-      if (!message || !message.node) {
-        return;
-      }
-      state.suppressEnsureVisibleUntil = Date.now() + MANUAL_NAV_SCROLL_LOCK_MS;
-      setActiveIndex(index, true);
-      snapNavListToEdge(index);
-      scrollToMessage(message.node);
+      activateNavItem(item);
     });
+    state.ui.body.addEventListener('keydown', handleItemKeydown);
 
     state.ui.body.addEventListener('pointerover', handleItemPointerOver);
     state.ui.body.addEventListener('pointerout', handleItemPointerOut);
@@ -209,6 +203,36 @@
     state.ui.preview.addEventListener('pointerenter', handlePreviewPointerEnter);
     state.ui.preview.addEventListener('pointerleave', handlePreviewPointerLeave);
     state.ui.preview.addEventListener('click', handlePreviewClick);
+  }
+
+  function handleItemKeydown(event) {
+    if (!event) {
+      return;
+    }
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+    const item = event.target && event.target.closest ? event.target.closest('.nav-item') : null;
+    if (!item || !state.ui.body.contains(item)) {
+      return;
+    }
+    event.preventDefault();
+    activateNavItem(item);
+  }
+
+  function activateNavItem(item) {
+    if (!item) {
+      return;
+    }
+    const index = Number(item.dataset.index);
+    const message = state.messages[index];
+    if (!message || !message.node) {
+      return;
+    }
+    state.suppressEnsureVisibleUntil = Date.now() + MANUAL_NAV_SCROLL_LOCK_MS;
+    setActiveIndex(index, true);
+    snapNavListToEdge(index);
+    scrollToMessage(message.node);
   }
 
   function handlePanelWheel(event) {
@@ -236,12 +260,14 @@
     let startY = 0;
     let startTop = 0;
 
-    const saved = loadFabPosition(storageKey);
-    const initialTop =
-      saved && typeof saved.top === 'number'
-        ? saved.top
-        : fab.getBoundingClientRect().top;
+    const initialTop = fab.getBoundingClientRect().top;
     applyFabPosition(fab, initialTop);
+    loadFabPosition(storageKey).then((saved) => {
+      if (!saved || typeof saved.top !== 'number') {
+        return;
+      }
+      applyFabPosition(fab, saved.top);
+    });
 
     window.addEventListener('resize', () => {
       const rect = fab.getBoundingClientRect();
@@ -314,6 +340,9 @@
   function saveFabPosition(key, fab) {
     const rect = fab.getBoundingClientRect();
     const payload = { top: rect.top };
+    if (ns.storage && typeof ns.storage.setJson === 'function') {
+      ns.storage.setJson(key, payload);
+    }
     try {
       window.localStorage.setItem(key, JSON.stringify(payload));
     } catch (error) {
@@ -322,22 +351,53 @@
   }
 
   function loadFabPosition(key) {
+    const legacyValue = loadLegacyFabPosition(key);
+    if (!ns.storage || typeof ns.storage.getJson !== 'function') {
+      return Promise.resolve(legacyValue);
+    }
+    return ns.storage
+      .getJson(key)
+      .then((storedValue) => {
+        const normalized = normalizeFabPosition(storedValue);
+        if (normalized) {
+          return normalized;
+        }
+        if (legacyValue) {
+          ns.storage.setJson(key, legacyValue);
+        }
+        return legacyValue;
+      })
+      .catch(() => legacyValue);
+  }
+
+  function loadLegacyFabPosition(key) {
     try {
       const raw = window.localStorage.getItem(key);
       if (!raw) {
         return null;
       }
-      const parsed = JSON.parse(raw);
-      if (typeof parsed.top === 'number') {
-        return { top: parsed.top };
-      }
-      if (typeof parsed.left === 'number' && typeof parsed.top === 'number') {
-        return { top: parsed.top };
-      }
+      return normalizeFabPosition(raw);
     } catch (error) {
       return null;
     }
-    return null;
+  }
+
+  function normalizeFabPosition(value) {
+    let parsed = value;
+    if (typeof parsed === 'string') {
+      try {
+        parsed = JSON.parse(parsed);
+      } catch (error) {
+        return null;
+      }
+    }
+    if (!parsed || typeof parsed !== 'object') {
+      return null;
+    }
+    if (typeof parsed.top !== 'number') {
+      return null;
+    }
+    return { top: parsed.top };
   }
 
   function clamp(value, min, max) {
@@ -569,6 +629,19 @@
 
   function loadMinimalMode() {
     return behaviorApi.loadMinimalMode();
+  }
+
+  function hydrateMinimalModePreference() {
+    Promise.resolve(loadMinimalMode()).then((storedValue) => {
+      if (typeof storedValue !== 'boolean') {
+        return;
+      }
+      if (storedValue === state.minimalMode) {
+        return;
+      }
+      state.minimalMode = storedValue;
+      syncAdaptiveMode(true);
+    });
   }
 
   function handleItemPointerOver(event) {

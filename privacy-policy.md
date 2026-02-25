@@ -7,11 +7,11 @@
 
 ## 导言 / Introduction
 
-**ChatGPT & Gemini Quick Navigator** 是一款由 **vince chung**（以下简称“我们”）提供的浏览器扩展程序。本隐私政策用于说明我们如何处理与您相关的信息。我们高度重视您的隐私，并以数据最小化为原则设计本扩展。  
+**JumpNav（ChatGPT & Gemini Quick Navigator）** 是一款由 **vince chung**（以下简称“我们”）提供的浏览器扩展程序。本隐私政策用于说明我们如何处理与您相关的信息。我们高度重视您的隐私，并以数据最小化为原则设计本扩展。  
 您使用或继续使用本扩展，即表示您已阅读并理解本隐私政策，并同意我们按照本隐私政策说明的方式处理相关信息。  
 如对本隐私政策或相关事宜有任何问题，请通过 **hysltway@gmail.com** 与我们联系。
 
-**ChatGPT & Gemini Quick Navigator** is a browser extension provided by **vince chung** (“we”, “us”, or “our”). This Privacy Policy explains how we handle information related to you. We take your privacy seriously and designed this extension with a data-minimization principle.  
+**JumpNav (ChatGPT & Gemini Quick Navigator)** is a browser extension provided by **vince chung** (“we”, “us”, or “our”). This Privacy Policy explains how we handle information related to you. We take your privacy seriously and designed this extension with a data-minimization principle.  
 By using or continuing to use this extension, you acknowledge that you have read and understood this Privacy Policy and agree to the practices described herein.  
 If you have any questions about this Privacy Policy, please contact **hysltway@gmail.com**.
 

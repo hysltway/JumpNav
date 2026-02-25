@@ -204,6 +204,11 @@
         background: var(--nav-hover);
       }
 
+      .panel-toggle:focus-visible {
+        outline: 2px solid var(--nav-item-active-border);
+        outline-offset: 2px;
+      }
+
       .panel-toggle.is-active {
         border-color: var(--nav-control-active-border);
         background: var(--nav-control-active-bg);
@@ -330,6 +335,11 @@
         background: var(--nav-item-hover-bg);
         box-shadow: 0 6px 16px var(--nav-item-active-shadow);
         transform: translateY(-1px);
+      }
+
+      .nav-item:focus-visible {
+        outline: 2px solid var(--nav-item-active-border);
+        outline-offset: 2px;
       }
 
       .nav-item.is-active {
@@ -525,6 +535,11 @@
         border-color: var(--nav-accent-strong);
         color: var(--nav-accent-strong);
         background: var(--nav-hover);
+      }
+
+      .fab:focus-visible {
+        outline: 2px solid var(--nav-item-active-border);
+        outline-offset: 2px;
       }
 
       .fab.dragging {

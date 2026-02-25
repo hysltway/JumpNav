@@ -4,7 +4,7 @@ JumpNav 是一款为 ChatGPT 与 Gemini 打造的悬浮侧边导航器，可将�
 
 **语言:** **简体中文** | [English](README_EN.md)
 
-> 当前版本：**v1.0.0**
+> 当前版本：**v1.3.2**
 
 ## 🚀 Chrome Web Store（推荐）
 

@@ -4,7 +4,7 @@ JumpNav is a floating side navigator for ChatGPT and Gemini that turns long AI c
 
 **Language:** [简体中文](README.md) | **English**
 
-> Current Version: **v1.0.0**
+> Current Version: **v1.3.2**
 
 ## 🚀 Chrome Web Store (Recommended)
 
