@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "JumpNav: The most elegant AI chat navigator you’ve ever seen.",
   "description": "Floating navigator for ChatGPT,Gemini,Claude. Turn long chats into clickable prompt outlines with reply previews and one-click jump.",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "icons": {
     "16": "logo16.png",
     "48": "logo48.png",
@@ -10,6 +10,7 @@
   },
   "action": {
     "default_title": "JumpNav",
+    "default_popup": "popup/popup.html",
     "default_icon": {
       "16": "logo16.png",
       "24": "logo24.png",
