@@ -619,7 +619,18 @@
     if (typeof content !== 'string') {
       return '';
     }
-    return content.replace(/\r\n/g, '\n').trim();
+    return trimBlankLines(content.replace(/\r\n/g, '\n'));
+  }
+
+  function trimBlankLines(value) {
+    const lines = value.split('\n');
+    while (lines.length && lines[0].trim() === '') {
+      lines.shift();
+    }
+    while (lines.length && lines[lines.length - 1].trim() === '') {
+      lines.pop();
+    }
+    return lines.join('\n');
   }
 
   function detectChatGptColorScheme(documentRef, windowRef) {

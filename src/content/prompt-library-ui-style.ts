@@ -287,6 +287,28 @@ ${UI_KIT_STYLE_TEXT}
       .prompt-textarea {
         min-height: 144px;
         padding: 12px 14px;
+        scrollbar-width: thin;
+        scrollbar-color: color-mix(in srgb, var(--ui-scrollbar-thumb, rgba(31, 31, 31, 0.16)) 56%, transparent) transparent;
+      }
+
+      .prompt-textarea::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .prompt-textarea::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .prompt-textarea::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+        background: color-mix(in srgb, var(--ui-scrollbar-thumb, rgba(31, 31, 31, 0.16)) 56%, transparent);
+      }
+
+      .prompt-textarea:hover::-webkit-scrollbar-thumb,
+      .prompt-textarea:focus::-webkit-scrollbar-thumb {
+        background: color-mix(in srgb, var(--ui-scrollbar-thumb-hover, rgba(31, 31, 31, 0.24)) 58%, transparent);
       }
 
       .prompt-section {
@@ -398,24 +420,42 @@ ${UI_KIT_STYLE_TEXT}
 
       .prompt-item {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        align-items: start;
-        column-gap: 8px;
+        gap: 8px;
+        align-content: start;
       }
 
-      .prompt-item-main {
+      .prompt-item-head,
+      .prompt-item-body,
+      .prompt-item-title-wrap,
+      .prompt-item-head-main,
+      .prompt-item-body-main {
         min-width: 0;
       }
 
       .prompt-item-head {
-        min-width: 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .prompt-item-head-main,
+      .prompt-item-body-main {
+        display: block;
+      }
+
+      .prompt-item-head-main {
+        width: 100%;
       }
 
       .prompt-item-title {
-        display: block;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
         overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+        white-space: normal;
       }
 
       .prompt-item-preview {
@@ -445,7 +485,7 @@ ${UI_KIT_STYLE_TEXT}
         justify-content: flex-start;
         gap: 4px;
         flex-wrap: nowrap;
-        align-self: start;
+        align-self: center;
         cursor: default;
         opacity: 0.82;
         transition:

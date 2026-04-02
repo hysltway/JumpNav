@@ -1,7 +1,7 @@
 {
   "name": "jumpnav",
   "private": true,
-  "version": "3.6.0",
+  "version": "3.6.1",
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/dev.mjs",

@@ -152,16 +152,19 @@
     item.dataset.promptId = prompt.id;
     item.setAttribute('role', 'listitem');
 
-    const main = document.createElement('button');
-    main.type = 'button';
-    main.className = 'prompt-item-main ui-item-main';
-    main.dataset.action = 'inject-prompt';
-    main.dataset.promptId = prompt.id;
-    main.disabled = hasBusyAction;
-    main.setAttribute('aria-label', t('prompt_library_insert_prompt', [prompt.title]));
-
     const head = document.createElement('div');
     head.className = 'prompt-item-head';
+
+    const headMain = document.createElement('button');
+    headMain.type = 'button';
+    headMain.className = 'prompt-item-head-main ui-item-main';
+    headMain.dataset.action = 'inject-prompt';
+    headMain.dataset.promptId = prompt.id;
+    headMain.disabled = hasBusyAction;
+    headMain.setAttribute('aria-label', t('prompt_library_insert_prompt', [prompt.title]));
+
+    const titleWrap = document.createElement('div');
+    titleWrap.className = 'prompt-item-title-wrap';
 
     const title = document.createElement('h3');
     title.className = 'prompt-item-title ui-item-title';
@@ -201,17 +204,31 @@
     actions.appendChild(copyButton);
     actions.appendChild(deleteButton);
 
-    head.appendChild(title);
+    titleWrap.appendChild(title);
+    headMain.appendChild(titleWrap);
+    head.appendChild(headMain);
+    head.appendChild(actions);
+
+    const body = document.createElement('div');
+    body.className = 'prompt-item-body';
+
+    const bodyMain = document.createElement('button');
+    bodyMain.type = 'button';
+    bodyMain.className = 'prompt-item-body-main ui-item-main';
+    bodyMain.dataset.action = 'inject-prompt';
+    bodyMain.dataset.promptId = prompt.id;
+    bodyMain.disabled = hasBusyAction;
+    bodyMain.setAttribute('aria-label', t('prompt_library_insert_prompt', [prompt.title]));
 
     const preview = document.createElement('p');
     preview.className = 'prompt-item-preview ui-item-preview';
     applyHighlightedText(preview, prompt.content, query);
 
-    main.appendChild(head);
-    main.appendChild(preview);
+    bodyMain.appendChild(preview);
+    body.appendChild(bodyMain);
 
-    item.appendChild(main);
-    item.appendChild(actions);
+    item.appendChild(head);
+    item.appendChild(body);
     return item;
   }
 

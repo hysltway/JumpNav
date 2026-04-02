@@ -9,14 +9,14 @@ It turns long conversations into clickable outlines with prompt and reply previe
 
 **Language:** [简体中文](README.md) | **English**
 
-> Current Version: **v3.6.0**
+> Current Version: **v3.6.1**
 
-## Updates in v3.6.0
+## Updates in v3.6.1
 
-- Added direct prompt editing in Prompt Library, so saved prompts can be updated in place instead of being deleted and recreated.
-- Extended the prompt form state flow to switch correctly between create and edit modes, including title-assist recovery, duplicate-title checks, and save button copy.
-- Refined the prompt item action layout and title truncation behavior so list actions stay usable without crowding prompt content.
-- Synced localization copy across Chinese, English, German, Spanish, and Japanese, then updated version references and release notes for `v3.6.0`.
+- Fixed Prompt Library content normalization so internal line breaks are preserved while only leading and trailing blank lines are trimmed.
+- Reworked the prompt item interaction structure by separating the title area and body area, reducing conflicts between action buttons and insert targets.
+- Improved textarea scrollbar styling and multi-line title wrapping so long content and long titles remain easier to read and operate.
+- Removed the repo-local wrap-up skill copy, standardized on the global `jumpnav-release-sync`, and synced version references for `v3.6.1`.
 
 ## Chrome Web Store (Recommended)
 
@@ -32,7 +32,6 @@ Now live on the Chrome Web Store. Install from the store for automatic updates.
 - First load: open `chrome://extensions`, enable Developer Mode, choose “Load unpacked”, and load the repo's `dist/` directory
 - Daily iteration: keep `npm run dev` running; the scripts watch build output and `public/` assets, then trigger development-time extension or page reloads when possible. If the current site tab still does not pick up the latest content script automatically, refresh that page once
 - Production build: `npm run build`
-- Project wrap-up skill: explicitly use [`jumpnav-release-sync`](.codex/skills/jumpnav-release-sync/SKILL.md) to inspect changes, sync docs, bump version, and create a local commit
 
 ## Core Value
 

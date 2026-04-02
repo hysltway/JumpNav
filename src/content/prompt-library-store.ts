@@ -287,7 +287,7 @@ function normalizeContentText(value: unknown): string {
   if (typeof value !== 'string') {
     return '';
   }
-  return value.replace(/\r\n/g, '\n').trim();
+  return trimBlankLines(value.replace(/\r\n/g, '\n'));
 }
 
 function normalizeOptionalText(value: unknown): string {
@@ -295,6 +295,17 @@ function normalizeOptionalText(value: unknown): string {
     return '';
   }
   return value.trim();
+}
+
+function trimBlankLines(value: string): string {
+  const lines = value.split('\n');
+  while (lines.length && lines[0].trim() === '') {
+    lines.shift();
+  }
+  while (lines.length && lines[lines.length - 1].trim() === '') {
+    lines.pop();
+  }
+  return lines.join('\n');
 }
 
 function createId(prefix: string): string {
