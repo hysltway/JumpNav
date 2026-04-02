@@ -9,14 +9,14 @@ It turns long conversations into clickable outlines with prompt and reply previe
 
 **Language:** [简体中文](README.md) | **English**
 
-> Current Version: **v3.5.0**
+> Current Version: **v3.6.0**
 
-## Updates in v3.5.0
+## Updates in v3.6.0
 
-- Added a shared growth-tracking flow that records key engagement events such as navigator jumps, Prompt Library opens, favorites, and popup opens, while also accumulating usage days across sessions.
-- Added a threshold-based in-page growth prompt that asks active users for a Chrome Web Store review or a GitHub star after enough real usage, with dismiss and do-not-show-again paths.
-- Connected the growth prompt to the shared link and localization system, and refined its show timing and visual stage so the reminder waits for a stable page and feels more intentional on screen.
-- Updated version references and release notes for `v3.5.0`.
+- Added direct prompt editing in Prompt Library, so saved prompts can be updated in place instead of being deleted and recreated.
+- Extended the prompt form state flow to switch correctly between create and edit modes, including title-assist recovery, duplicate-title checks, and save button copy.
+- Refined the prompt item action layout and title truncation behavior so list actions stay usable without crowding prompt content.
+- Synced localization copy across Chinese, English, German, Spanish, and Japanese, then updated version references and release notes for `v3.6.0`.
 
 ## Chrome Web Store (Recommended)
 
@@ -32,6 +32,7 @@ Now live on the Chrome Web Store. Install from the store for automatic updates.
 - First load: open `chrome://extensions`, enable Developer Mode, choose “Load unpacked”, and load the repo's `dist/` directory
 - Daily iteration: keep `npm run dev` running; the scripts watch build output and `public/` assets, then trigger development-time extension or page reloads when possible. If the current site tab still does not pick up the latest content script automatically, refresh that page once
 - Production build: `npm run build`
+- Project wrap-up skill: explicitly use [`jumpnav-release-sync`](.codex/skills/jumpnav-release-sync/SKILL.md) to inspect changes, sync docs, bump version, and create a local commit
 
 ## Core Value
 
@@ -42,7 +43,7 @@ Now live on the Chrome Web Store. Install from the store for automatic updates.
 ## Feature Checklist
 
 - Automatically extracts user prompts and builds a clickable navigator for ChatGPT, Gemini, and Claude.
-- Built-in Prompt Library for saving reusable prompts with search, copy, delete, and reuse flows.
+- Built-in Prompt Library for saving and editing reusable prompts, with search, copy, delete, and reuse flows.
 - Supports one-click prompt injection into the current site's input box, with copy as the fallback when direct insertion is unavailable.
 - Supports both mouse click and keyboard `Enter` / `Space` on navigator items.
 - Tracks reading position in real time, highlights the active item, and keeps it visible in the list.

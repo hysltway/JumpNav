@@ -184,6 +184,9 @@
   "prompt_library_new_prompt": {
     "message": "Neuer Prompt"
   },
+  "prompt_library_edit_prompt": {
+    "message": "Prompt bearbeiten"
+  },
   "prompt_library_search_placeholder": {
     "message": "Prompts durchsuchen"
   },
@@ -243,6 +246,9 @@
   },
   "prompt_library_save": {
     "message": "Speichern"
+  },
+  "prompt_library_save_changes": {
+    "message": "Änderungen speichern"
   },
   "prompt_library_save_busy": {
     "message": "Wird gespeichert..."

@@ -54,6 +54,8 @@
       query: ''
     },
     promptFormVisible: false,
+    promptFormMode: 'create',
+    editingPromptId: '',
     duplicateWarning: '',
     duplicateConfirmToken: '',
     savePending: false,
@@ -184,6 +186,11 @@
 
       if (action === 'copy-prompt') {
         handleCopyPrompt(promptId);
+        return;
+      }
+
+      if (action === 'edit-prompt') {
+        handleEditPrompt(promptId);
         return;
       }
 
@@ -458,16 +465,16 @@
     }
 
     const restoredTitleAssistFlow = restoreTitleAssistFlowOnOpen();
-      schedulePosition();
-      window.setTimeout(() => {
-        if (state.open) {
-          if (restoredTitleAssistFlow) {
-            ui.promptTitleInput.focus();
-            return;
-          }
-          ui.searchInput.focus();
+    schedulePosition();
+    window.setTimeout(() => {
+      if (state.open) {
+        if (restoredTitleAssistFlow) {
+          ui.promptTitleInput.focus();
+          return;
         }
-      }, 40);
+        ui.searchInput.focus();
+      }
+    }, 40);
   }
 
   function schedulePosition() {
@@ -509,6 +516,8 @@
       return;
     }
 
+    state.promptFormMode = 'create';
+    state.editingPromptId = '';
     state.promptFormVisible = true;
     clearDuplicateReminder();
     resetPromptForm();
@@ -524,9 +533,38 @@
       return;
     }
     state.promptFormVisible = false;
+    resetPromptFormMode();
     clearTitleAssistFlow();
     clearDuplicateReminder();
     render();
+  }
+
+  function handleEditPrompt(promptId: string) {
+    const ui = state.ui;
+    if (state.savePending || state.busyAction) {
+      return;
+    }
+    if (!ui) {
+      return;
+    }
+
+    const prompt = findPromptById(promptId);
+    if (!prompt) {
+      return;
+    }
+
+    state.promptFormVisible = true;
+    state.promptFormMode = 'edit';
+    state.editingPromptId = prompt.id;
+    clearTitleAssistFlow();
+    clearDuplicateReminder();
+    ui.promptTitleInput.value = prompt.title;
+    ui.promptContentInput.value = prompt.content;
+    render();
+
+    window.setTimeout(() => {
+      ui.promptTitleInput.focus();
+    }, 50);
   }
 
   function resetPromptForm() {
@@ -585,13 +623,26 @@
     syncPromptFormState();
 
     try {
-      const result = await store.createPrompt({
-        title,
-        content
-      });
+      if (state.promptFormMode === 'edit') {
+        const promptId = state.editingPromptId;
+        if (!promptId || !findPromptById(promptId)) {
+          return;
+        }
 
-      state.library = result.library;
+        state.library = await store.updatePrompt(promptId, {
+          title,
+          content
+        });
+      } else {
+        const result = await store.createPrompt({
+          title,
+          content
+        });
+        state.library = result.library;
+      }
+
       state.promptFormVisible = false;
+      resetPromptFormMode();
       clearTitleAssistFlow();
       clearDuplicateReminder();
       render();
@@ -701,10 +752,16 @@
   function resetPanelEphemeralState() {
     const hadVisibleState = state.promptFormVisible;
     state.promptFormVisible = false;
+    resetPromptFormMode();
     clearDuplicateReminder();
     if (hadVisibleState) {
       render();
     }
+  }
+
+  function resetPromptFormMode() {
+    state.promptFormMode = 'create';
+    state.editingPromptId = '';
   }
 
   function syncPromptFormState(draft: PromptFormDraftState = getPromptDraft()) {
@@ -721,7 +778,7 @@
         ? t('prompt_library_save_busy')
         : draft.confirmDuplicate
           ? t('prompt_library_save_anyway')
-          : t('prompt_library_save'),
+          : t(state.promptFormMode === 'edit' ? 'prompt_library_save_changes' : 'prompt_library_save'),
       saveDisabled: interactionsLocked || !draft.canSave,
       saveBusy: state.savePending,
       cancelDisabled: interactionsLocked,
@@ -738,12 +795,13 @@
     const duplicateToken = title.toLowerCase();
     const library = state.library;
     const store = state.store;
+    const excludePromptId = state.promptFormMode === 'edit' ? state.editingPromptId : '';
     const hasDuplicateTitle = Boolean(
       title &&
         library &&
         store &&
         typeof store.hasDuplicateTitle === 'function' &&
-        store.hasDuplicateTitle(library, title)
+        store.hasDuplicateTitle(library, title, excludePromptId)
     );
 
     return {
@@ -932,6 +990,8 @@
 
     state.titleAssistFlow = {
       active: true,
+      mode: state.promptFormMode,
+      promptId: state.editingPromptId,
       awaitingAiTitle: true,
       contentDraft: draft.content,
       titleDraft: '',
@@ -961,6 +1021,8 @@
 
     const draft = getPromptDraft();
     const flow = state.titleAssistFlow as TitleAssistFlow;
+    flow.mode = state.promptFormMode;
+    flow.promptId = state.editingPromptId;
     flow.contentDraft = draft.content;
     flow.titleDraft = draft.title;
     if (draft.title) {
@@ -993,6 +1055,8 @@
     }
 
     state.promptFormVisible = true;
+    state.promptFormMode = flow.mode || 'create';
+    state.editingPromptId = flow.promptId || '';
     state.filter.query = '';
     if (ui.searchInput) {
       ui.searchInput.value = '';

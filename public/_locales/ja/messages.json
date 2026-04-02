@@ -184,6 +184,9 @@
   "prompt_library_new_prompt": {
     "message": "新しいプロンプト"
   },
+  "prompt_library_edit_prompt": {
+    "message": "プロンプトを編集"
+  },
   "prompt_library_search_placeholder": {
     "message": "プロンプトを検索"
   },
@@ -243,6 +246,9 @@
   },
   "prompt_library_save": {
     "message": "保存"
+  },
+  "prompt_library_save_changes": {
+    "message": "変更を保存"
   },
   "prompt_library_save_busy": {
     "message": "保存中..."

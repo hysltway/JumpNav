@@ -170,6 +170,12 @@
     const actions = document.createElement('div');
     actions.className = 'prompt-item-actions';
 
+    const editButton = uiStyle.createIconButton('edit-prompt', t('prompt_library_edit_prompt'), 'edit');
+    editButton.dataset.promptId = prompt.id;
+    editButton.disabled = hasBusyAction;
+    editButton.setAttribute('aria-label', t('prompt_library_edit_prompt'));
+    editButton.title = t('prompt_library_edit_prompt');
+
     const copyButton = uiStyle.createIconButton('copy-prompt', t('prompt_library_copy_prompt'), 'copy');
     copyButton.dataset.promptId = prompt.id;
     copyButton.dataset.busy = isCopying ? '1' : '0';
@@ -191,6 +197,7 @@
     );
     deleteButton.title = t(isDeleting ? 'prompt_library_deleting_prompt' : 'prompt_library_delete_prompt');
 
+    actions.appendChild(editButton);
     actions.appendChild(copyButton);
     actions.appendChild(deleteButton);
 

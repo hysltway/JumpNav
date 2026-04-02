@@ -396,18 +396,26 @@ ${UI_KIT_STYLE_TEXT}
         padding-block: 8px;
       }
 
+      .prompt-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: start;
+        column-gap: 8px;
+      }
+
+      .prompt-item-main {
+        min-width: 0;
+      }
+
       .prompt-item-head {
         min-width: 0;
-        padding-right: 80px;
       }
 
       .prompt-item-title {
-        overflow-wrap: anywhere;
-        word-break: break-all;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
+        display: block;
         overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
       }
 
       .prompt-item-preview {
@@ -431,26 +439,32 @@ ${UI_KIT_STYLE_TEXT}
       }
 
       .prompt-item-actions {
-        position: absolute;
-        top: 6px;
-        right: 14px;
+        position: relative;
         display: inline-flex;
         align-items: center;
-        justify-content: flex-end;
-        gap: 6px;
+        justify-content: flex-start;
+        gap: 4px;
         flex-wrap: nowrap;
+        align-self: start;
         cursor: default;
         opacity: 0.82;
-        transform: translateY(2px);
         transition:
           opacity 180ms var(--ui-ease-out-quart),
           transform 180ms var(--ui-ease-out-quart);
       }
 
+      .prompt-item-actions .prompt-icon-button {
+        width: 30px;
+        height: 30px;
+      }
+
+      .prompt-item-actions .prompt-icon-button[data-busy="1"]::after {
+        inset: 7px;
+      }
+
       .prompt-item:hover .prompt-item-actions,
       .prompt-item:focus-within .prompt-item-actions {
         opacity: 1;
-        transform: translateY(0);
       }
 
       .prompt-empty {

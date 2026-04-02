@@ -53,6 +53,38 @@ function createPromptLibraryStore(
     return { library, prompt };
   }
 
+  async function updatePrompt(promptId: string, draft: PromptDraft): Promise<PromptLibrary> {
+    const library = await loadLibrary(true);
+    const now = env.now();
+    const title = normalizeLineText(draft.title);
+    const content = normalizeContentText(draft.content);
+    let changed = false;
+
+    library.prompts = sortPrompts(
+      library.prompts.map((prompt) => {
+        if (prompt.id !== promptId) {
+          return prompt;
+        }
+
+        changed = true;
+        return {
+          ...prompt,
+          title,
+          content,
+          updatedAt: now
+        };
+      })
+    );
+
+    if (!changed) {
+      return library;
+    }
+
+    library.updatedAt = now;
+    await writeRaw(library);
+    return library;
+  }
+
   async function deletePrompt(promptId: string): Promise<PromptLibrary> {
     const library = await loadLibrary(true);
     library.prompts = library.prompts.filter((prompt) => prompt.id !== promptId);
@@ -114,14 +146,14 @@ function createPromptLibraryStore(
     );
   }
 
-  function hasDuplicateTitle(library: PromptLibrary, title: string): boolean {
+  function hasDuplicateTitle(library: PromptLibrary, title: string, excludePromptId = ''): boolean {
     const normalizedTitle = normalizeLineText(title).toLowerCase();
     if (!normalizedTitle) {
       return false;
     }
 
     return normalizeLibrary(library, env.now).prompts.some(
-      (prompt) => prompt.title.trim().toLowerCase() === normalizedTitle
+      (prompt) => prompt.id !== excludePromptId && prompt.title.trim().toLowerCase() === normalizedTitle
     );
   }
 
@@ -145,6 +177,7 @@ function createPromptLibraryStore(
     read,
     write,
     createPrompt,
+    updatePrompt,
     deletePrompt,
     markCopied,
     filterPrompts,

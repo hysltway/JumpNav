@@ -184,6 +184,9 @@
   "prompt_library_new_prompt": {
     "message": "Nuevo prompt"
   },
+  "prompt_library_edit_prompt": {
+    "message": "Editar prompt"
+  },
   "prompt_library_search_placeholder": {
     "message": "Buscar prompts"
   },
@@ -243,6 +246,9 @@
   },
   "prompt_library_save": {
     "message": "Guardar"
+  },
+  "prompt_library_save_changes": {
+    "message": "Guardar cambios"
   },
   "prompt_library_save_busy": {
     "message": "Guardando..."

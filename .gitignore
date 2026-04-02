@@ -1,5 +1,9 @@
 商城简介.txt
-.codex/
+.codex/*
+!.codex/skills/
+.codex/skills/*
+!.codex/skills/jumpnav-release-sync/
+!.codex/skills/jumpnav-release-sync/**
 chatgpt-nav-extension.zip
 examplecode/
 docs/

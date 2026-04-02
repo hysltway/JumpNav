@@ -305,6 +305,8 @@ export interface PromptDraft {
   content: string;
 }
 
+export type PromptFormMode = 'create' | 'edit';
+
 export interface PromptFilter {
   query?: string;
 }
@@ -321,10 +323,11 @@ export interface PromptLibraryStoreApi {
   read(): Promise<PromptLibrary>;
   write(library: PromptLibrary): Promise<PromptLibrary>;
   createPrompt(draft: PromptDraft): Promise<{ library: PromptLibrary; prompt: PromptRecord }>;
+  updatePrompt(promptId: string, draft: PromptDraft): Promise<PromptLibrary>;
   deletePrompt(promptId: string): Promise<PromptLibrary>;
   markCopied(promptId: string): Promise<PromptLibrary>;
   filterPrompts(library: PromptLibrary, filter?: PromptFilter): PromptRecord[];
-  hasDuplicateTitle(library: PromptLibrary, title: string): boolean;
+  hasDuplicateTitle(library: PromptLibrary, title: string, excludePromptId?: string): boolean;
   normalizeLibrary(rawLibrary: unknown, nowFn: () => string): PromptLibrary;
 }
 
@@ -446,6 +449,8 @@ export interface CopyResult {
 
 export interface TitleAssistFlow {
   active: boolean;
+  mode: PromptFormMode;
+  promptId: string;
   awaitingAiTitle: boolean;
   contentDraft: string;
   titleDraft: string;
@@ -468,6 +473,8 @@ export interface PromptLibraryState {
   url: string;
   filter: Required<PromptFilter>;
   promptFormVisible: boolean;
+  promptFormMode: PromptFormMode;
+  editingPromptId: string;
   duplicateWarning: string;
   duplicateConfirmToken: string;
   savePending: boolean;

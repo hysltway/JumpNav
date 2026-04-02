@@ -184,6 +184,9 @@
   "prompt_library_new_prompt": {
     "message": "新建提示词"
   },
+  "prompt_library_edit_prompt": {
+    "message": "编辑提示词"
+  },
   "prompt_library_search_placeholder": {
     "message": "搜索提示词"
   },
@@ -243,6 +246,9 @@
   },
   "prompt_library_save": {
     "message": "保存"
+  },
+  "prompt_library_save_changes": {
+    "message": "保存修改"
   },
   "prompt_library_save_busy": {
     "message": "保存中..."
