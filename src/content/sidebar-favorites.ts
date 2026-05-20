@@ -48,10 +48,10 @@ const SITE_CONFIG: Record<SupportedSiteId, SiteConfig> = {
     }
   },
   gemini: {
-    selector: 'a[data-test-id="conversation"][href*="/app/"]',
+    selector: 'a[data-test-id="conversation"][href*="/app/"], gem-nav-list-item[data-test-id="conversation"] a[href*="/app/"]',
     pathPrefix: '/app/',
     resolveMount(item) {
-      const title = findDirectChildByClass(item, 'conversation-title');
+      const title = item.querySelector<HTMLElement>('.conversation-title, .title-text');
       if (!title) {
         return null;
       }
@@ -494,15 +494,6 @@ function normalizePathname(value: string): string {
     return trimmed;
   }
   return trimmed.endsWith('/') ? trimmed.slice(0, -1) : trimmed;
-}
-
-function findDirectChildByClass(parent: Element, className: string): HTMLElement | null {
-  for (const child of Array.from(parent.children)) {
-    if (child instanceof HTMLElement && child.classList.contains(className)) {
-      return child;
-    }
-  }
-  return null;
 }
 
 function getCurrentSiteId(): SupportedSiteId | null {

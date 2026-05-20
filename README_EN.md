@@ -9,14 +9,13 @@ It turns long conversations into clickable outlines with prompt and reply previe
 
 **Language:** [简体中文](README.md) | **English**
 
-> Current Version: **v3.6.1**
+> Current Version: **v3.6.2**
 
-## Updates in v3.6.1
+## Updates in v3.6.2
 
-- Fixed Prompt Library content normalization so internal line breaks are preserved while only leading and trailing blank lines are trimmed.
-- Reworked the prompt item interaction structure by separating the title area and body area, reducing conflicts between action buttons and insert targets.
-- Improved textarea scrollbar styling and multi-line title wrapping so long content and long titles remain easier to read and operate.
-- Removed the repo-local wrap-up skill copy, standardized on the global `jumpnav-release-sync`, and synced version references for `v3.6.1`.
+- Added compatibility for Gemini's updated sidebar conversation structure so favorite actions can keep detecting the new `gem-nav-list-item` conversation links.
+- Updated Gemini conversation title mounting to support the new `.title-text` title node.
+- Removed Gemini-specific light theme overrides and now uses the shared light theme variables to reduce visual conflicts in the updated Gemini UI.
 
 ## Chrome Web Store (Recommended)
 

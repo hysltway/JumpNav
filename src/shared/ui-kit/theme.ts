@@ -46,31 +46,7 @@ const NAV_LIGHT_BASE = Object.freeze({
 
 const NAV_LIGHT_SITE_OVERRIDES = Object.freeze({
   chatgpt: Object.freeze({}),
-  gemini: Object.freeze({
-    '--nav-bg': '#f3f6fc',
-    '--nav-surface': '#f3f6fc',
-    '--nav-border': '#dce1e9',
-    '--nav-text': '#1f2a3d',
-    '--nav-muted': '#546377',
-    '--nav-accent': '#dce1e9',
-    '--nav-accent-strong': '#0842a0',
-    '--nav-hover': '#dce1e9',
-    '--nav-item-bg': '#e9eef6',
-    '--nav-item-hover-bg': '#dce1e9',
-    '--nav-item-active-bg': '#d3e3fd',
-    '--nav-item-hover-border': '#dce1e9',
-    '--nav-item-active-border': '#d3e3fd',
-    '--nav-item-active-text': '#0842a0',
-    '--nav-item-indicator-color': '#0842a0',
-    '--nav-item-active-color': '#0842a0',
-    '--nav-item-active-shadow': 'rgba(8, 66, 160, 0.16)',
-    '--nav-control-hover-border': '#dce1e9',
-    '--nav-control-hover-text': '#0842a0',
-    '--nav-control-active-border': '#d3e3fd',
-    '--nav-control-active-bg': '#d3e3fd',
-    '--nav-control-active-text': '#0842a0',
-    '--nav-button-bg': '#f3f6fc'
-  }),
+  gemini: Object.freeze({}),
   claude: Object.freeze({
     '--nav-bg': '#faf9f5',
     '--nav-surface': '#faf9f5',
