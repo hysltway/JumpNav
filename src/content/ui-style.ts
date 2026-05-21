@@ -193,10 +193,10 @@ ${defaultNavVars}
         max-height: 100%;
         overflow-y: auto;
         overflow-x: hidden;
-        padding: 12px;
+        padding: 10px 12px 12px;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 6px;
         background: var(--nav-surface);
       }
 
@@ -316,6 +316,7 @@ ${defaultNavVars}
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        line-height: 1.35;
         transition: color 180ms var(--nav-ease-out-quart);
       }
 

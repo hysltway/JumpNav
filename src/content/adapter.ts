@@ -8,6 +8,8 @@ const ROLE_ALIASES = {
 };
 const ROLE_SELECTOR = ROLE_ATTRIBUTES.map((attributeName) => `[${attributeName}]`).join(',');
 
+const CHATGPT_TURN_SELECTOR = 'section[data-turn]';
+
 const GEMINI_SELECTORS = {
   root: ['chat-window', 'main', 'body'],
   turn: ['.conversation-container'],
@@ -81,9 +83,43 @@ function createChatLikeAdapter(id: SiteId, documentRef: Document): Adapter {
       return documentRef.querySelector('main') || documentRef.body;
     },
     getConversationMessages(root) {
+      const turnMessages = collectChatGptTurnMessages(root);
+      if (turnMessages.length) {
+        return turnMessages;
+      }
       return collectMessagesByRoleAttributes(root, ROLE_SELECTOR);
     }
   };
+}
+
+function collectChatGptTurnMessages(root: ParentNode | null): ConversationEntry[] {
+  if (!root || typeof root.querySelectorAll !== 'function') {
+    return [];
+  }
+  const messages: Array<ConversationEntry & { order: number; sourceIndex: number }> = [];
+  let sourceIndex = 0;
+  root.querySelectorAll(CHATGPT_TURN_SELECTOR).forEach((node) => {
+    const rawRole = node.getAttribute('data-turn');
+    if (rawRole === 'user' || rawRole === 'assistant') {
+      messages.push({
+        node,
+        role: rawRole,
+        order: getChatGptTurnOrder(node),
+        sourceIndex
+      });
+      sourceIndex += 1;
+    }
+  });
+  if (messages.some((message) => Number.isFinite(message.order))) {
+    messages.sort((a, b) => a.order - b.order || a.sourceIndex - b.sourceIndex);
+  }
+  return messages.map(({ node, role }) => ({ node, role }));
+}
+
+function getChatGptTurnOrder(node: Element): number {
+  const testId = node.getAttribute('data-testid') || '';
+  const match = /^conversation-turn-(\d+)$/.exec(testId);
+  return match ? Number(match[1]) : Number.POSITIVE_INFINITY;
 }
 
 function createGeminiAdapter(documentRef: Document): Adapter {

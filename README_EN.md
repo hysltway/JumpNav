@@ -9,13 +9,14 @@ It turns long conversations into clickable outlines with prompt and reply previe
 
 **Language:** [简体中文](README.md) | **English**
 
-> Current Version: **v3.6.2**
+> Current Version: **v3.6.3**
 
-## Updates in v3.6.2
+## Updates in v3.6.3
 
-- Added compatibility for Gemini's updated sidebar conversation structure so favorite actions can keep detecting the new `gem-nav-list-item` conversation links.
-- Updated Gemini conversation title mounting to support the new `.title-text` title node.
-- Removed Gemini-specific light theme overrides and now uses the shared light theme variables to reduce visual conflicts in the updated Gemini UI.
+- Added compatibility for ChatGPT's updated `section[data-turn]` conversation structure so the navigator can keep building entries in the real prompt and reply order.
+- Improved ChatGPT jumps in virtualized scrolling views by targeting mounted prompt content first and waiting for messages to remount when needed.
+- Added conversation-scoped text caching for ChatGPT indexing to reduce missing navigator entries when messages are temporarily unmounted.
+- Renamed navigator count and fallback item copy from "Prompt" to "Question" across supported locales.
 
 ## Chrome Web Store (Recommended)
 

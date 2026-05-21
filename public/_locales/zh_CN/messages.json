@@ -127,7 +127,7 @@
     }
   },
   "nav_prompt_count": {
-    "message": "提示词：$COUNT$",
+    "message": "提问：$COUNT$",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -159,7 +159,7 @@
     "message": "无提示词"
   },
   "nav_prompt_item_fallback": {
-    "message": "提示词 $NUMBER$",
+    "message": "提问 $NUMBER$",
     "placeholders": {
       "number": {
         "content": "$1"

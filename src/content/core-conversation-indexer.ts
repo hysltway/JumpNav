@@ -13,6 +13,12 @@ interface ConversationIndexerOverrides {
   previewMax?: number;
 }
 
+interface CachedConversationMessage {
+  title: string;
+  preview: string;
+  text: string;
+}
+
 function createConversationIndexer(
   overrides: ConversationIndexerOverrides = {}
 ): ConversationIndexerApi {
@@ -39,6 +45,8 @@ function createConversationIndexer(
     typeof overrides.previewMax === 'number' && Number.isFinite(overrides.previewMax)
       ? overrides.previewMax
       : 96;
+  const messageCache = new Map<string, CachedConversationMessage>();
+  let messageCacheScope = '';
 
   function getConversationSequence(
     adapter: Adapter | null,
@@ -54,12 +62,16 @@ function createConversationIndexer(
     sequence: ConversationEntry[],
     adapter: Adapter | null
   ): ConversationMessage[] {
+    syncMessageCacheScope(adapter);
     const messages: ConversationMessage[] = [];
     sequence.forEach((entry, index) => {
       if (entry.role !== 'user') {
         return;
       }
-      messages.push(buildUserMessage(sequence, entry, index, messages.length, adapter));
+      const message = buildUserMessage(sequence, entry, index, messages.length, adapter);
+      if (message) {
+        messages.push(message);
+      }
     });
     return messages;
   }
@@ -70,18 +82,31 @@ function createConversationIndexer(
     index: number,
     promptIndex: number,
     adapter: Adapter | null
-  ): ConversationMessage {
+  ): ConversationMessage | null {
     const text = getUserMessageText(entry.node, adapter);
-    const title = text || t('nav_prompt_item_fallback', [String(promptIndex + 1)]);
+    const cacheKey = getMessageCacheKey(entry.node, adapter);
+    const cachedMessage = cacheKey ? messageCache.get(cacheKey) || null : null;
+    if (!text && !cachedMessage) {
+      return null;
+    }
+    const title = text || cachedMessage?.title || t('nav_prompt_item_fallback', [String(promptIndex + 1)]);
     const assistantSummary = getAssistantSummary(sequence, index + 1);
-    const preview = assistantSummary.text ? truncate(assistantSummary.text, previewMax) : '';
-    return {
+    const preview = assistantSummary.text ? truncate(assistantSummary.text, previewMax) : cachedMessage?.preview || '';
+    const message = {
       node: entry.node,
       title,
       preview,
-      text,
+      text: text || cachedMessage?.text || '',
       endNode: assistantSummary.lastAssistantNode
     };
+    if (cacheKey && message.text) {
+      messageCache.set(cacheKey, {
+        title: message.title,
+        preview: message.preview,
+        text: message.text
+      });
+    }
+    return message;
   }
 
   function getAssistantSummary(
@@ -94,7 +119,7 @@ function createConversationIndexer(
       const item = sequence[i];
       if (item.role === 'assistant') {
         if (!assistantText) {
-          assistantText = normalizeText(item.node.textContent || '');
+          assistantText = getAssistantMessageText(item.node);
         }
         lastAssistantNode = item.node;
         continue;
@@ -104,6 +129,16 @@ function createConversationIndexer(
       }
     }
     return { text: assistantText, lastAssistantNode };
+  }
+
+  function getAssistantMessageText(node: Element | null): string {
+    if (!node) {
+      return '';
+    }
+    const contentNode = node.querySelector(
+      '.markdown, .prose, [data-message-author-role="assistant"], [data-author-role="assistant"]'
+    );
+    return normalizeText((contentNode || node).textContent || '');
   }
 
   function getUserMessageText(node: Element | null, adapter: Adapter | null): string {
@@ -117,14 +152,59 @@ function createConversationIndexer(
         return visibleText;
       }
     }
-    return normalizeText(node.textContent || '');
+    const contentNode =
+      adapterId === 'chatgpt'
+        ? node.querySelector(
+            '[data-testid="collapsible-user-message-content"], [class*="user-message-bubble-color"], [data-message-author-role="user"], [data-author-role="user"]'
+          )
+        : null;
+    return normalizeText((contentNode || node).textContent || '');
+  }
+
+  function syncMessageCacheScope(adapter: Adapter | null): void {
+    const nextScope = getMessageCacheScope(adapter);
+    if (nextScope === messageCacheScope) {
+      return;
+    }
+    messageCacheScope = nextScope;
+    messageCache.clear();
+  }
+
+  function getMessageCacheScope(adapter: Adapter | null): string {
+    const adapterId = adapter && adapter.id ? adapter.id : '';
+    const href = typeof location !== 'undefined' ? location.href : '';
+    return `${adapterId}:${href}`;
+  }
+
+  function getMessageCacheKey(node: Element | null, adapter: Adapter | null): string {
+    if (!node) {
+      return '';
+    }
+    const adapterId = adapter && adapter.id ? adapter.id : '';
+    if (adapterId === 'chatgpt') {
+      const turnId = getAttributeFromNodeOrDescendant(node, 'data-turn-id');
+      if (turnId) {
+        return `${adapterId}:turn:${turnId}`;
+      }
+      const testId = node.getAttribute('data-testid') || '';
+      if (/^conversation-turn-\d+$/.test(testId)) {
+        return `${adapterId}:turn:${testId}`;
+      }
+    }
+    const messageId = getAttributeFromNodeOrDescendant(node, 'data-message-id');
+    return messageId ? `${adapterId}:message:${messageId}` : '';
+  }
+
+  function getAttributeFromNodeOrDescendant(node: Element, attributeName: string): string {
+    const directValue = node.getAttribute(attributeName);
+    if (directValue) {
+      return directValue;
+    }
+    return node.querySelector(`[${attributeName}]`)?.getAttribute(attributeName) || '';
   }
 
   function buildMessagesSignature(messages: ConversationMessage[]): string {
-    const lastMessage = messages[messages.length - 1];
-    const lastText = lastMessage ? lastMessage.text : '';
-    const lastPreview = lastMessage ? lastMessage.preview : '';
-    return `${messages.length}:${lastText}:${lastPreview}`;
+    return messages.map((message) => `${message.text}:${message.preview}`).join('\n');
   }
 
   return {

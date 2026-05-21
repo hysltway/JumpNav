@@ -127,7 +127,7 @@
     }
   },
   "nav_prompt_count": {
-    "message": "プロンプト: $COUNT$",
+    "message": "質問: $COUNT$",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -159,7 +159,7 @@
     "message": "プロンプトなし"
   },
   "nav_prompt_item_fallback": {
-    "message": "プロンプト $NUMBER$",
+    "message": "質問 $NUMBER$",
     "placeholders": {
       "number": {
         "content": "$1"

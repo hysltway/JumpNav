@@ -66,6 +66,13 @@ const { CONFIG } = ns;
   const THEME_TRANSITION_STYLE_ID = 'chatgpt-nav-theme-transition-style';
   const THEME_TRANSITION_DURATION_MS = 520;
   const THEME_TRANSITION_EASING = 'cubic-bezier(0.22, 1, 0.36, 1)';
+  const CHATGPT_MESSAGE_TARGET_SELECTOR =
+    '[data-testid="collapsible-user-message-content"], [class*="user-message-bubble-color"], [data-message-author-role="user"], [data-author-role="user"]';
+  const CHATGPT_TURN_ANCHOR_SELECTOR =
+    'section[data-turn], [data-turn-id-container], [data-turn-id], [data-testid^="conversation-turn"]';
+  const CHATGPT_RESPONSE_ROOT_SELECTOR = '#thread, main#main';
+  const CHATGPT_REMOUNT_WAIT_MS = 1500;
+  const CHATGPT_REMOUNT_POLL_MS = 60;
 
   const state: CoreState = {
     started: false,
@@ -365,12 +372,170 @@ const { CONFIG } = ns;
 
   function scrollToMessage(node: Element) {
     state.lastScrollAt = Date.now();
-    const behavior =
-      typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        ? 'auto'
+    if (state.adapter?.id === 'chatgpt') {
+      scrollChatGptMessage(node);
+    } else {
+      const behavior =
+        typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          ? 'auto'
         : 'smooth';
-    node.scrollIntoView({ behavior, block: 'center' });
+      scrollNodeToCenter(node, behavior);
+    }
     flashTarget(node);
+  }
+
+  function scrollChatGptMessage(node: Element) {
+    const mountedTarget = getChatGptMountedTarget(node);
+    if (mountedTarget) {
+      scrollElementIntoView(mountedTarget, 'center', 'instant');
+      dispatchScrollEvent(mountedTarget);
+      return;
+    }
+
+    const anchor = getLiveChatGptTurnAnchor(node) || node;
+    scrollElementIntoView(anchor, 'center', 'instant');
+    dispatchScrollEvent(anchor);
+    void finishChatGptJump(node, anchor);
+  }
+
+  async function finishChatGptJump(node: Element, anchor: Element) {
+    const mountedTarget = await waitForChatGptMountedTarget(node, anchor);
+    if (!mountedTarget) {
+      return;
+    }
+    scrollElementIntoView(mountedTarget, 'center', 'instant');
+    dispatchScrollEvent(mountedTarget);
+    flashTarget(mountedTarget);
+  }
+
+  async function waitForChatGptMountedTarget(node: Element, anchor: Element): Promise<Element | null> {
+    const deadline = Date.now() + CHATGPT_REMOUNT_WAIT_MS;
+    while (Date.now() < deadline) {
+      const mountedTarget = getChatGptMountedTarget(node) || getChatGptMountedTarget(anchor);
+      if (mountedTarget) {
+        return mountedTarget;
+      }
+      await sleep(CHATGPT_REMOUNT_POLL_MS);
+    }
+    return null;
+  }
+
+  function getChatGptMountedTarget(node: Element): Element | null {
+    const liveAnchor = getLiveChatGptTurnAnchor(node);
+    const liveTarget = liveAnchor?.querySelector(CHATGPT_MESSAGE_TARGET_SELECTOR) || null;
+    if (liveTarget) {
+      return liveTarget;
+    }
+
+    const directTarget = node.isConnected ? node.querySelector(CHATGPT_MESSAGE_TARGET_SELECTOR) : null;
+    if (directTarget) {
+      return directTarget;
+    }
+    return null;
+  }
+
+  function getLiveChatGptTurnAnchor(node: Element): Element | null {
+    const turnId = getChatGptTurnId(node);
+    if (!turnId) {
+      const anchor = getChatGptTurnAnchor(node);
+      return anchor && anchor.isConnected ? anchor : null;
+    }
+    const root = document.querySelector(CHATGPT_RESPONSE_ROOT_SELECTOR) || document;
+    const escapedTurnId = escapeAttributeValue(turnId);
+    return root.querySelector(
+      `[data-turn-id="${escapedTurnId}"], [data-turn-id-container="${escapedTurnId}"]`
+    );
+  }
+
+  function getChatGptTurnAnchor(node: Element): Element | null {
+    if (node.matches(CHATGPT_TURN_ANCHOR_SELECTOR)) {
+      return node;
+    }
+    return node.closest(CHATGPT_TURN_ANCHOR_SELECTOR);
+  }
+
+  function getChatGptTurnId(node: Element): string {
+    const turn = getChatGptTurnAnchor(node);
+    return (
+      turn?.getAttribute('data-turn-id') ||
+      turn?.getAttribute('data-turn-id-container') ||
+      node.getAttribute('data-turn-id') ||
+      node.getAttribute('data-turn-id-container') ||
+      ''
+    );
+  }
+
+  function scrollElementIntoView(
+    element: Element,
+    block: ScrollLogicalPosition,
+    behavior: ScrollBehavior | 'instant'
+  ) {
+    try {
+      element.scrollIntoView({ behavior, block } as ScrollIntoViewOptions);
+    } catch (error) {
+      element.scrollIntoView({ block });
+    }
+  }
+
+  function dispatchScrollEvent(node: Element) {
+    const container = findScrollableAncestor(node);
+    container?.dispatchEvent(new Event('scroll', { bubbles: true }));
+  }
+
+  function sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  function escapeAttributeValue(value: string): string {
+    if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+      return CSS.escape(value);
+    }
+    return value.replace(/["\\]/g, '\\$&');
+  }
+
+  function scrollNodeToCenter(node: Element, behavior: ScrollBehavior) {
+    const target = getScrollTargetNode(node);
+    const container = findScrollableAncestor(target);
+    if (!container) {
+      target.scrollIntoView({ behavior, block: 'center' });
+      return;
+    }
+
+    const nodeRect = target.getBoundingClientRect();
+    const targetCenter = nodeRect.top + nodeRect.height / 2;
+    const viewportCenter = window.innerHeight / 2;
+    container.scrollBy({
+      top: targetCenter - viewportCenter,
+      behavior
+    });
+  }
+
+  function getScrollTargetNode(node: Element): Element {
+    if (state.adapter?.id !== 'chatgpt') {
+      return node;
+    }
+    return node.querySelector(CHATGPT_MESSAGE_TARGET_SELECTOR) || node;
+  }
+
+  function findScrollableAncestor(node: Element): HTMLElement | null {
+    let current = node.parentElement;
+    while (current && current !== document.documentElement) {
+      if (isScrollableElement(current)) {
+        return current;
+      }
+      current = current.parentElement;
+    }
+    return (document.scrollingElement || document.documentElement) as HTMLElement;
+  }
+
+  function isScrollableElement(node: Element) {
+    if (node.scrollHeight <= node.clientHeight + 1) {
+      return false;
+    }
+    const overflowY = window.getComputedStyle(node).overflowY;
+    return overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay';
   }
 
   function flashTarget(node: Element) {

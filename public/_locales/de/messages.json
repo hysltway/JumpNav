@@ -127,7 +127,7 @@
     }
   },
   "nav_prompt_count": {
-    "message": "Prompts: $COUNT$",
+    "message": "Fragen: $COUNT$",
     "placeholders": {
       "count": {
         "content": "$1"
@@ -159,7 +159,7 @@
     "message": "Keine Prompts"
   },
   "nav_prompt_item_fallback": {
-    "message": "Prompt $NUMBER$",
+    "message": "Frage $NUMBER$",
     "placeholders": {
       "number": {
         "content": "$1"
