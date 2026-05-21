@@ -9,14 +9,13 @@ It turns long conversations into clickable outlines with prompt and reply previe
 
 **Language:** [简体中文](README.md) | **English**
 
-> Current Version: **v3.6.3**
+> Current Version: **v3.6.4**
 
-## Updates in v3.6.3
+## Updates in v3.6.4
 
-- Added compatibility for ChatGPT's updated `section[data-turn]` conversation structure so the navigator can keep building entries in the real prompt and reply order.
-- Improved ChatGPT jumps in virtualized scrolling views by targeting mounted prompt content first and waiting for messages to remount when needed.
-- Added conversation-scoped text caching for ChatGPT indexing to reduce missing navigator entries when messages are temporarily unmounted.
-- Renamed navigator count and fallback item copy from "Prompt" to "Question" across supported locales.
+- Updated navigator entry generation so empty-text messages no longer create numbered fallback entries, keeping the outline focused on real prompts.
+- Simplified navigator item titles and accessibility labels to use the message title and original text directly, avoiding inconsistent Minimal mode labels.
+- Removed the unused fallback item locale strings so indexing behavior and locales stay aligned.
 
 ## Chrome Web Store (Recommended)
 

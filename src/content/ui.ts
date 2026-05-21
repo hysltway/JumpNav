@@ -28,10 +28,6 @@ function getPromptCountLabel(count: number): string {
   return t('nav_prompt_count', [String(count)]);
 }
 
-function getPromptFallbackLabel(index: number): string {
-  return t('nav_prompt_item_fallback', [String(index + 1)]);
-}
-
 function getThemeToggleLabel(nextScheme: ColorScheme): string {
   return t(nextScheme === 'dark' ? 'nav_switch_to_dark' : 'nav_switch_to_light');
 }
@@ -286,9 +282,8 @@ function createMessageItem(
   item.dataset.index = String(index);
   item.tabIndex = 0;
   item.setAttribute('role', 'button');
-  const fallbackLabel = getPromptFallbackLabel(index);
-  item.setAttribute('aria-label', minimalMode ? fallbackLabel : message.title || fallbackLabel);
-  item.title = minimalMode ? fallbackLabel : message.text;
+  item.setAttribute('aria-label', message.title);
+  item.title = message.text;
   if (minimalMode) {
     const minimal = document.createElement('div');
     minimal.className = 'nav-item-minimal';

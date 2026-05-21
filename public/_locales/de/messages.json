@@ -158,14 +158,6 @@
   "nav_empty_minimal": {
     "message": "Keine Prompts"
   },
-  "nav_prompt_item_fallback": {
-    "message": "Frage $NUMBER$",
-    "placeholders": {
-      "number": {
-        "content": "$1"
-      }
-    }
-  },
   "nav_fab_label": {
     "message": "Nav"
   },

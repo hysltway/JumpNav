@@ -158,14 +158,6 @@
   "nav_empty_minimal": {
     "message": "无提示词"
   },
-  "nav_prompt_item_fallback": {
-    "message": "提问 $NUMBER$",
-    "placeholders": {
-      "number": {
-        "content": "$1"
-      }
-    }
-  },
   "nav_fab_label": {
     "message": "导航"
   },

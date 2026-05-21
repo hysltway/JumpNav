@@ -1,5 +1,4 @@
 import { ns } from './namespace';
-import { t } from '../shared/i18n';
 import type {
   Adapter,
   ConversationEntry,
@@ -68,7 +67,7 @@ function createConversationIndexer(
       if (entry.role !== 'user') {
         return;
       }
-      const message = buildUserMessage(sequence, entry, index, messages.length, adapter);
+      const message = buildUserMessage(sequence, entry, index, adapter);
       if (message) {
         messages.push(message);
       }
@@ -80,7 +79,6 @@ function createConversationIndexer(
     sequence: ConversationEntry[],
     entry: ConversationEntry,
     index: number,
-    promptIndex: number,
     adapter: Adapter | null
   ): ConversationMessage | null {
     const text = getUserMessageText(entry.node, adapter);
@@ -89,17 +87,16 @@ function createConversationIndexer(
     if (!text && !cachedMessage) {
       return null;
     }
-    const title = text || cachedMessage?.title || t('nav_prompt_item_fallback', [String(promptIndex + 1)]);
     const assistantSummary = getAssistantSummary(sequence, index + 1);
     const preview = assistantSummary.text ? truncate(assistantSummary.text, previewMax) : cachedMessage?.preview || '';
     const message = {
       node: entry.node,
-      title,
+      title: text || cachedMessage!.title,
       preview,
-      text: text || cachedMessage?.text || '',
+      text: text || cachedMessage!.text,
       endNode: assistantSummary.lastAssistantNode
     };
-    if (cacheKey && message.text) {
+    if (cacheKey && text) {
       messageCache.set(cacheKey, {
         title: message.title,
         preview: message.preview,
